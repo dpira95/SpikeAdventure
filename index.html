@@ -8,15 +8,18 @@
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
 </head>
 <body style="margin: 0; overflow: hidden;">
-    <!-- Scena AR con fotocamera in alta risoluzione -->
-    <a-scene embedded arjs="sourceType: webcam; displayWidth: 1920; displayHeight: 1080;" vr-mode-ui="enabled: false">
-        <!-- Definizione del marker Hiro -->
+    <a-scene 
+        embedded 
+        arjs="sourceType: webcam; displayWidth: 1280; displayHeight: 720;" 
+        vr-mode-ui="enabled: false">
+        
+        <!-- Marker Hiro -->
         <a-marker preset="hiro">
-            <!-- Oggetto 3D: un cubo rosso per test -->
             <a-box position="0 0.5 0" scale="0.5 0.5 0.5" material="color: red;"></a-box>
         </a-marker>
-        <!-- Camera per la realtà aumentata -->
-        <a-entity camera></a-entity>
+        
+        <!-- Camera con FOV corretto e controlli attivi -->
+        <a-entity camera position="0 0 5" look-controls wasd-controls="acceleration:20" fov="75"></a-entity>
     </a-scene>
 </body>
 </html>
