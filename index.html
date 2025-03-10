@@ -8,7 +8,8 @@
     <script src="https://rawgit.com/jeromeetienne/ar.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
 </head>
 <body style="margin: 0; overflow: hidden;">
-<a-scene embedded arjs>
+<a-scene embedded arjs vr-mode-ui="enabled: false" renderer="antialias: true; logarithmicDepthBuffer: true; colorManagement: true;">
+
     <!-- Definizione del marker Hiro -->
     <a-marker preset="hiro">
         <!-- Oggetto 3D: una sfera rossa per il test -->
