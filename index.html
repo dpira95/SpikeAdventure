@@ -2,16 +2,22 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>AR.js - UI Fissa con Impostazioni Base</title>
+    <title>AR.js - UI con Movimento Verticale</title>
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <!-- AR.js per A-Frame -->
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <!-- Componenti per gesture (pinch e rotate) -->
+    <!-- Componenti per gesture (per pinch e rotate) -->
     <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js"></script>
     <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
     <style>
-      body, html { margin: 0; padding: 0; overflow: hidden; width: 100%; height: 100%; }
+      body, html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+      }
       #resetButton {
         position: fixed;
         bottom: 20px;
@@ -22,16 +28,82 @@
         font-size: 16px;
       }
     </style>
+    <!-- Componente custom per muovere verticalmente (su e giù) -->
+    <script>
+      AFRAME.registerComponent('vertical-drag', {
+        schema: {
+          enabled: { default: true },
+          factor: { default: 0.01 }  // Fattore di conversione del delta (puoi modificarlo)
+        },
+        init: function() {
+          this.startY = null;
+          // Bind delle funzioni
+          this.onMouseDown = this.onMouseDown.bind(this);
+          this.onTouchStart = this.onTouchStart.bind(this);
+          this.onMouseMove = this.onMouseMove.bind(this);
+          this.onTouchMove = this.onTouchMove.bind(this);
+          this.onMouseUp = this.onMouseUp.bind(this);
+          this.onTouchEnd = this.onTouchEnd.bind(this);
+          this.el.sceneEl.canvas.addEventListener('mousedown', this.onMouseDown);
+          this.el.sceneEl.canvas.addEventListener('touchstart', this.onTouchStart);
+          window.addEventListener('mousemove', this.onMouseMove);
+          window.addEventListener('touchmove', this.onTouchMove);
+          window.addEventListener('mouseup', this.onMouseUp);
+          window.addEventListener('touchend', this.onTouchEnd);
+        },
+        remove: function() {
+          this.el.sceneEl.canvas.removeEventListener('mousedown', this.onMouseDown);
+          this.el.sceneEl.canvas.removeEventListener('touchstart', this.onTouchStart);
+          window.removeEventListener('mousemove', this.onMouseMove);
+          window.removeEventListener('touchmove', this.onTouchMove);
+          window.removeEventListener('mouseup', this.onMouseUp);
+          window.removeEventListener('touchend', this.onTouchEnd);
+        },
+        onMouseDown: function(evt) {
+          this.startY = evt.clientY;
+        },
+        onTouchStart: function(evt) {
+          this.startY = evt.touches[0].clientY;
+        },
+        onMouseMove: function(evt) {
+          if (this.startY !== null) {
+            let deltaY = (evt.clientY - this.startY) * this.data.factor;
+            let pos = this.el.getAttribute('position');
+            pos.y += deltaY;
+            this.el.setAttribute('position', pos);
+            // Forza la rotazione a zero per far sì che il pannello resti parallelo al marker
+            this.el.setAttribute('rotation', '0 0 0');
+            this.startY = evt.clientY;
+          }
+        },
+        onTouchMove: function(evt) {
+          if (this.startY !== null) {
+            let deltaY = (evt.touches[0].clientY - this.startY) * this.data.factor;
+            let pos = this.el.getAttribute('position');
+            pos.y += deltaY;
+            this.el.setAttribute('position', pos);
+            this.el.setAttribute('rotation', '0 0 0');
+            this.startY = evt.touches[0].clientY;
+          }
+        },
+        onMouseUp: function() {
+          this.startY = null;
+        },
+        onTouchEnd: function() {
+          this.startY = null;
+        }
+      });
+    </script>
   </head>
   <body>
-    <!-- Pulsante esterno per reset -->
+    <!-- Pulsante esterno per ripristinare le impostazioni di base -->
     <button id="resetButton">Reset UI</button>
-    
     <a-scene embedded arjs>
-      <!-- Marker (preset "hiro", oppure personalizza con type e url) -->
+      <!-- Marker: usa il preset "hiro" oppure personalizza con type e url -->
       <a-marker id="marker" preset="hiro">
-        <!-- UI: figlia del marker; "gesture-handler" consente modifiche a runtime -->
-        <a-entity id="ui-root" position="0 0 0" rotation="0 0 0" scale="2 2 2" gesture-handler>
+        <!-- UI come figlia del marker, con componente gesture-handler per pinch/rotate e vertical-drag per spostamento su/giù.
+             Le impostazioni di base (position, rotation, scale) saranno ripristinate al rilevamento -->
+        <a-entity id="ui-root" vertical-drag position="0 0 0" rotation="0 0 0" scale="2 2 2" gesture-handler>
           <!-- Textbox in alto -->
           <a-plane id="top-textbox"
                    width="2.5" height="0.3"
@@ -44,10 +116,8 @@
                     width="2.3"
                     position="0 0 0.01"></a-text>
           </a-plane>
-          
           <!-- Menu principale -->
           <a-entity id="menu" visible="true" position="0 0.5 0" rotation="0 0 0">
-            <!-- Sfondo del menu -->
             <a-plane width="2.5" height="0.8" color="#888" opacity="0.8"></a-plane>
             <!-- Pulsante 1 -->
             <a-plane id="button1"
@@ -57,14 +127,8 @@
                      rotation="0 0 0"
                      class="clickable"
                      onclick="openDetailPanel(1)">
-              <a-text value="Pulsante 1 - Testo 1"
-                      align="left"
-                      position="-0.9 0 0.02"
-                      width="1.8"></a-text>
-              <a-text value="Pulsante 1 - Testo 2"
-                      align="right"
-                      position="0.9 0 0.02"
-                      width="1.8"></a-text>
+              <a-text value="Pulsante 1 - Testo 1" align="left" position="-0.9 0 0.02" width="1.8"></a-text>
+              <a-text value="Pulsante 1 - Testo 2" align="right" position="0.9 0 0.02" width="1.8"></a-text>
             </a-plane>
             <!-- Pulsante 2 -->
             <a-plane id="button2"
@@ -74,14 +138,8 @@
                      rotation="0 0 0"
                      class="clickable"
                      onclick="openDetailPanel(2)">
-              <a-text value="Pulsante 2 - Testo 1"
-                      align="left"
-                      position="-0.9 0 0.02"
-                      width="1.8"></a-text>
-              <a-text value="Pulsante 2 - Testo 2"
-                      align="right"
-                      position="0.9 0 0.02"
-                      width="1.8"></a-text>
+              <a-text value="Pulsante 2 - Testo 1" align="left" position="-0.9 0 0.02" width="1.8"></a-text>
+              <a-text value="Pulsante 2 - Testo 2" align="right" position="0.9 0 0.02" width="1.8"></a-text>
             </a-plane>
             <!-- Pulsante 3 -->
             <a-plane id="button3"
@@ -91,17 +149,10 @@
                      rotation="0 0 0"
                      class="clickable"
                      onclick="openDetailPanel(3)">
-              <a-text value="Pulsante 3 - Testo 1"
-                      align="left"
-                      position="-0.9 0 0.02"
-                      width="1.8"></a-text>
-              <a-text value="Pulsante 3 - Testo 2"
-                      align="right"
-                      position="0.9 0 0.02"
-                      width="1.8"></a-text>
+              <a-text value="Pulsante 3 - Testo 1" align="left" position="-0.9 0 0.02" width="1.8"></a-text>
+              <a-text value="Pulsante 3 - Testo 2" align="right" position="0.9 0 0.02" width="1.8"></a-text>
             </a-plane>
           </a-entity>
-          
           <!-- Pannello di dettaglio (inizialmente nascosto) -->
           <a-entity id="detail-panel" visible="false" position="0 -0.5 0" rotation="0 0 0">
             <a-plane width="2.5" height="1.2" color="#FFF" opacity="0.9"></a-plane>
@@ -156,27 +207,22 @@
     </a-scene>
 
     <script>
-      // Al rilevamento del marker, ripristina le impostazioni di base della UI
+      // Al rilevamento del marker, ripristina le impostazioni base della UI
       document.querySelector('#marker').addEventListener('markerFound', function() {
         let ui = document.getElementById('ui-root');
-        // Imposta le impostazioni di base: posizione, rotazione e scale
         ui.setAttribute('position', '0 0 0');
         ui.setAttribute('rotation', '0 0 0');
         ui.setAttribute('scale', '2 2 2');
       });
 
-      // Funzione per mostrare il pannello di dettaglio e nascondere il menu
       function openDetailPanel(buttonId) {
         document.querySelector('#menu').setAttribute('visible', 'false');
         document.querySelector('#detail-panel').setAttribute('visible', 'true');
       }
-      // Funzione per tornare al menu principale
       function closeDetailPanel() {
         document.querySelector('#detail-panel').setAttribute('visible', 'false');
         document.querySelector('#menu').setAttribute('visible', 'true');
       }
-
-      // Pulsante esterno per resettare la UI alle impostazioni di base
       document.getElementById('resetButton').addEventListener('click', function() {
         let ui = document.getElementById('ui-root');
         ui.setAttribute('position', '0 0 0');
