@@ -2,12 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>AR.js - UI centrata, ingrandibile e con reset</title>
+    <title>AR.js - UI Fissa con Impostazioni Base</title>
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <!-- AR.js per A-Frame -->
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <!-- Componenti per gesture (pinch/rotate) -->
+    <!-- Componenti per gesture (pinch e rotate) -->
     <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js"></script>
     <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
     <style>
@@ -24,13 +24,13 @@
     </style>
   </head>
   <body>
-    <!-- Bottone esterno per riposizionare la UI -->
+    <!-- Pulsante esterno per reset -->
     <button id="resetButton">Reset UI</button>
     
     <a-scene embedded arjs>
-      <!-- Marker: preset "hiro" (oppure personalizza con type e url) -->
+      <!-- Marker (preset "hiro", oppure personalizza con type e url) -->
       <a-marker id="marker" preset="hiro">
-        <!-- Contenitore UI con scale aumentata e gesture-handler per pinch/rotate -->
+        <!-- UI: figlia del marker; "gesture-handler" consente modifiche a runtime -->
         <a-entity id="ui-root" position="0 0 0" rotation="0 0 0" scale="2 2 2" gesture-handler>
           <!-- Textbox in alto -->
           <a-plane id="top-textbox"
@@ -57,8 +57,14 @@
                      rotation="0 0 0"
                      class="clickable"
                      onclick="openDetailPanel(1)">
-              <a-text value="Pulsante 1 - Testo 1" align="left" position="-0.9 0 0.02" width="1.8"></a-text>
-              <a-text value="Pulsante 1 - Testo 2" align="right" position="0.9 0 0.02" width="1.8"></a-text>
+              <a-text value="Pulsante 1 - Testo 1"
+                      align="left"
+                      position="-0.9 0 0.02"
+                      width="1.8"></a-text>
+              <a-text value="Pulsante 1 - Testo 2"
+                      align="right"
+                      position="0.9 0 0.02"
+                      width="1.8"></a-text>
             </a-plane>
             <!-- Pulsante 2 -->
             <a-plane id="button2"
@@ -68,8 +74,14 @@
                      rotation="0 0 0"
                      class="clickable"
                      onclick="openDetailPanel(2)">
-              <a-text value="Pulsante 2 - Testo 1" align="left" position="-0.9 0 0.02" width="1.8"></a-text>
-              <a-text value="Pulsante 2 - Testo 2" align="right" position="0.9 0 0.02" width="1.8"></a-text>
+              <a-text value="Pulsante 2 - Testo 1"
+                      align="left"
+                      position="-0.9 0 0.02"
+                      width="1.8"></a-text>
+              <a-text value="Pulsante 2 - Testo 2"
+                      align="right"
+                      position="0.9 0 0.02"
+                      width="1.8"></a-text>
             </a-plane>
             <!-- Pulsante 3 -->
             <a-plane id="button3"
@@ -79,8 +91,14 @@
                      rotation="0 0 0"
                      class="clickable"
                      onclick="openDetailPanel(3)">
-              <a-text value="Pulsante 3 - Testo 1" align="left" position="-0.9 0 0.02" width="1.8"></a-text>
-              <a-text value="Pulsante 3 - Testo 2" align="right" position="0.9 0 0.02" width="1.8"></a-text>
+              <a-text value="Pulsante 3 - Testo 1"
+                      align="left"
+                      position="-0.9 0 0.02"
+                      width="1.8"></a-text>
+              <a-text value="Pulsante 3 - Testo 2"
+                      align="right"
+                      position="0.9 0 0.02"
+                      width="1.8"></a-text>
             </a-plane>
           </a-entity>
           
@@ -131,19 +149,20 @@
         </a-entity>
       </a-marker>
       
-      <!-- Camera con cursore configurato per touch -->
+      <!-- Camera con cursore per interazioni touch -->
       <a-entity camera look-controls>
         <a-cursor rayOrigin="mouse" fuse="false"></a-cursor>
       </a-entity>
     </a-scene>
 
     <script>
-      // Al rilevamento del marker, sposta la UI (ui-root) come figlio della camera e imposta la posizione a "0 0 -2"
+      // Al rilevamento del marker, ripristina le impostazioni di base della UI
       document.querySelector('#marker').addEventListener('markerFound', function() {
         let ui = document.getElementById('ui-root');
-        let cam = document.querySelector('[camera]');
-        cam.appendChild(ui);
-        ui.setAttribute('position', '0 0 -2');
+        // Imposta le impostazioni di base: posizione, rotazione e scale
+        ui.setAttribute('position', '0 0 0');
+        ui.setAttribute('rotation', '0 0 0');
+        ui.setAttribute('scale', '2 2 2');
       });
 
       // Funzione per mostrare il pannello di dettaglio e nascondere il menu
@@ -157,10 +176,12 @@
         document.querySelector('#menu').setAttribute('visible', 'true');
       }
 
-      // Pulsante esterno per resettare la posizione della UI al centro (0 0 -2)
+      // Pulsante esterno per resettare la UI alle impostazioni di base
       document.getElementById('resetButton').addEventListener('click', function() {
         let ui = document.getElementById('ui-root');
-        ui.setAttribute('position', '0 0 -2');
+        ui.setAttribute('position', '0 0 0');
+        ui.setAttribute('rotation', '0 0 0');
+        ui.setAttribute('scale', '2 2 2');
       });
     </script>
   </body>
