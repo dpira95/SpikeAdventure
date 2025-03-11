@@ -1,24 +1,166 @@
 <!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Menu AR</title>
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/AR.js@1.7.2/aframe/build/aframe-ar.min.js"></script>
-  <script src="script.js" defer></script>
-</head>
-<body>
-  <a-scene embedded arjs>
-    <!-- Marker Hiro -->
-    <a-marker preset="hiro" id="hiroMarker">
-      <!-- Piano AR: trasparente -->
-      <a-plane width="2" height="1.5" color="blue" position="0 0 0" rotation="0 0 0"
-             
-      <!-- Menu: instanziato un po' sopra e in primo piano -->
-      <a-entity id="menuContainer" position="0 1 0.1"></a-entity>
-    </a-marker>
-    <a-camera></a-camera>
-  </a-scene>
-</body>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>AR.js e AR-Frame UI</title>
+    <!-- Includiamo A-Frame -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <!-- Includiamo AR.js per A-Frame -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+      /* Rimuoviamo margini e overflow dalla pagina */
+      body, html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      /* Overlay per UI (posizionato sopra la scena AR) */
+      #ui-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        pointer-events: none; /* Permette di cliccare sugli elementi A-Frame se necessario */
+      }
+      /* Textbox in cima con sfondo nero */
+      #top-textbox {
+        background-color: black;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        pointer-events: auto;
+      }
+      /* Menu contenente lo scroll mascherato */
+      #menu {
+        position: absolute;
+        top: 60px; /* subito sotto la textbox */
+        left: 0;
+        width: 100%;
+        height: 200px;
+        overflow: hidden; /* Maschera eventuale overflow */
+        pointer-events: auto;
+      }
+      /* Container scrollabile (l'overflow interno sarà scrollabile) */
+      #scroll-container {
+        width: 100%;
+        height: 100%;
+        overflow-y: scroll;
+      }
+      /* Stile per ogni button del menu, contenente 2 "textbox" (qui usate come etichette) */
+      .menu-button {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 5px;
+        padding: 10px;
+        background: #ddd;
+        border: none;
+        cursor: pointer;
+      }
+      .menu-button span {
+        margin: 0 5px;
+      }
+      /* Pannello di dettaglio (nascosto inizialmente) */
+      #detail-panel {
+        position: absolute;
+        top: 270px; /* sotto il menu */
+        left: 0;
+        width: 100%;
+        background: rgba(255,255,255,0.9);
+        padding: 10px;
+        display: none;
+        pointer-events: auto;
+      }
+      /* Slot per le immagini */
+      .image-slot {
+        width: 45%;
+        height: 100px;
+        background: #ccc;
+        display: inline-block;
+        margin: 2%;
+        text-align: center;
+        line-height: 100px;
+      }
+      /* Stile per le textbox interne al pannello */
+      .detail-textbox {
+        width: 90%;
+        padding: 5px;
+        margin: 5px 0;
+      }
+      /* Pulsante "indietro" */
+      #back-button {
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Scena AR -->
+    <a-scene embedded arjs>
+      <!-- Marker di esempio -->
+      <a-marker preset="hiro">
+        <a-box position="0 0.5 0" material="color: red;"></a-box>
+      </a-marker>
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- Overlay per l'interfaccia utente -->
+    <div id="ui-overlay">
+      <!-- Textbox in cima -->
+      <div id="top-textbox">
+        Testo in alto
+      </div>
+      <!-- Menu con scroll mascherato -->
+      <div id="menu">
+        <div id="scroll-container">
+          <!-- Ogni button contiene 2 "textbox" (qui rappresentate con span) -->
+          <button class="menu-button" onclick="openDetailPanel(1)">
+            <span>Pulsante 1 - Testo 1</span>
+            <span>Pulsante 1 - Testo 2</span>
+          </button>
+          <button class="menu-button" onclick="openDetailPanel(2)">
+            <span>Pulsante 2 - Testo 1</span>
+            <span>Pulsante 2 - Testo 2</span>
+          </button>
+          <button class="menu-button" onclick="openDetailPanel(3)">
+            <span>Pulsante 3 - Testo 1</span>
+            <span>Pulsante 3 - Testo 2</span>
+          </button>
+          <!-- Altri button se necessari -->
+        </div>
+      </div>
+      <!-- Pannello dei dettagli che si apre al click di un button -->
+      <div id="detail-panel">
+        <!-- Slot per le immagini -->
+        <div>
+          <div class="image-slot">Slot Immagine 1</div>
+          <div class="image-slot">Slot Immagine 2</div>
+        </div>
+        <!-- Pulsante d'azione -->
+        <button onclick="alert('Azione pulsante panel!')">Pulsante Azione</button>
+        <!-- 4 Textbox -->
+        <input type="text" class="detail-textbox" placeholder="Textbox 1">
+        <input type="text" class="detail-textbox" placeholder="Textbox 2">
+        <input type="text" class="detail-textbox" placeholder="Textbox 3">
+        <input type="text" class="detail-textbox" placeholder="Textbox 4">
+        <!-- Pulsante "Indietro" per tornare al menu -->
+        <button id="back-button" onclick="closeDetailPanel()">Indietro</button>
+      </div>
+    </div>
+
+    <script>
+      // Funzione per aprire il pannello dei dettagli
+      function openDetailPanel(buttonId) {
+        // Nascondiamo il menu e mostriamo il pannello
+        document.getElementById('menu').style.display = 'none';
+        document.getElementById('detail-panel').style.display = 'block';
+        // È possibile usare "buttonId" per caricare contenuti specifici
+      }
+
+      // Funzione per tornare al menu
+      function closeDetailPanel() {
+        document.getElementById('detail-panel').style.display = 'none';
+        document.getElementById('menu').style.display = 'block';
+      }
+    </script>
+  </body>
 </html>
