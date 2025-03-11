@@ -13,10 +13,10 @@
     <!-- Marker Hiro -->
     <a-marker preset="hiro" id="hiroMarker">
       <!-- Piano AR: trasparente -->
-      <a-plane width="2" height="1.5" color="blue" position="0 0 0" rotation="0 0 0" 
+      <a-plane width="2" height="1.5" color="blue" position="0 0 0" rotation="0 0 0"
                material="opacity: 0.3; transparent: true"></a-plane>
-      <!-- Menu: instanziato un po' sopra -->
-      <a-entity id="menuContainer" position="0 1 0"></a-entity>
+      <!-- Menu: instanziato un po' sopra e in primo piano -->
+      <a-entity id="menuContainer" position="0 1 0.1"></a-entity>
     </a-marker>
     <a-camera></a-camera>
   </a-scene>
