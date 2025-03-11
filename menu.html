@@ -4,9 +4,9 @@
 
   <!-- Marker Hiro -->
   <a-marker preset="hiro" id="hiroMarker">
-    <a-entity id="menuAR">
+    <a-entity id="menuAR" position="0 0 0"> <!-- Posiziona il menu sopra il marker -->
       <!-- Sfondo menu -->
-      <a-plane width="2.5" height="3.5" color="black" position="0 1 0" rotation="-90 0 0"></a-plane>
+      <a-plane width="2.5" height="3.5" color="black" position="0 0 0" rotation="0 0 0"></a-plane> <!-- Correzione rotazione -->
       <a-text value="Menu AR" position="0 1.6 0" align="center" color="white"></a-text>
 
       <!-- Lista del menu -->
@@ -23,7 +23,7 @@
 
   <!-- Contenitore per il pannello informazioni -->
   <a-entity id="infoContainer" visible="false">
-    <a-plane width="2.5" height="3" color="blue" position="0 1 0" rotation="-90 0 0"></a-plane>
+    <a-plane width="2.5" height="3" color="blue" position="0 1 0" rotation="0 0 0"></a-plane> <!-- Correzione rotazione -->
     <a-text id="infoTitle" value="" position="0 1.6 0" align="center" color="white"></a-text>
     <a-text id="infoDesc" value="" position="0 1.3 0" align="center" color="white"></a-text>
 
