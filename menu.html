@@ -1,33 +1,65 @@
-<a-scene embedded arjs>
-  <!-- Aggiungi il cursor alla camera per il rilevamento del tocco -->
-  <a-camera cursor="fuse: true; fuseTimeout: 500"></a-camera>
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8">
+    <title>AR Menu</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/AR.js@1.7.2/aframe/build/aframe-ar.min.js"></script>
+    <script>
+      // Funzioni minime per la gestione della visibilità
+      function showInfo(item) {
+        var menu = document.getElementById('menu');
+        var info = document.getElementById('info');
+        var infoTitle = document.getElementById('infoTitle');
 
-  <!-- Marker Hiro -->
-  <a-marker preset="hiro" id="hiroMarker">
-    <!-- Menu principale -->
-    <a-entity id="menuAR" position="0 0 0" visible="true">
-      <!-- Sfondo menu -->
-      <a-plane width="2.5" height="3.5" color="black" position="0 0 0"></a-plane>
-      <a-text value="Menu AR" position="0 1.6 0" align="center" color="white"></a-text>
+        // Imposta il titolo in base all'item selezionato
+        if (item === 'pizza1') {
+          infoTitle.setAttribute('value', 'Pizza Margherita');
+        } else if (item === 'pizza2') {
+          infoTitle.setAttribute('value', 'Pizza Diavola');
+        }
+        menu.setAttribute('visible', 'false');
+        info.setAttribute('visible', 'true');
+      }
 
-      <!-- Lista del menu -->
-      <a-entity id="menuList">
-        <a-plane class="menu-item" position="0 1.2 0" color="cyan" width="2" height="0.3" onclick="showInfo('pizza')">
-          <a-text value="Pizza Margherita - 10.00€" align="center"></a-text>
-        </a-plane>
-        <a-plane class="menu-item" position="0 0.9 0" color="cyan" width="2" height="0.3" onclick="showInfo('diavola')">
-          <a-text value="Pizza Diavola - 10.00€" align="center"></a-text>
+      function showMenu() {
+        document.getElementById('menu').setAttribute('visible', 'true');
+        document.getElementById('info').setAttribute('visible', 'false');
+      }
+    </script>
+  </head>
+  <body style="margin:0; overflow:hidden;">
+    <a-scene embedded arjs>
+      <!-- Camera con cursor per gestire il tocco -->
+      <a-camera cursor="fuse: true; fuseTimeout: 500"></a-camera>
+
+      <!-- Marker Hiro con il menu -->
+      <a-marker preset="hiro">
+        <a-entity id="menu" position="0 0 2" visible="true">
+          <!-- Sfondo del menu -->
+          <a-plane width="2.5" height="3.5" color="black" position="0 0 0"></a-plane>
+          <a-text value="Menu AR" position="0 1.6 0" align="center" color="white"></a-text>
+          <!-- Pulsante 1 -->
+          <a-plane position="0 1.2 0.01" width="2" height="0.3" color="cyan" onclick="showInfo('pizza1')">
+            <a-text value="Pizza Margherita - 10.00€" align="center" position="0 0 0.1" color="black"></a-text>
+          </a-plane>
+          <!-- Pulsante 2 -->
+          <a-plane position="0 0.9 0.01" width="2" height="0.3" color="cyan" onclick="showInfo('pizza2')">
+            <a-text value="Pizza Diavola - 10.00€" align="center" position="0 0 0.1" color="black"></a-text>
+          </a-plane>
+        </a-entity>
+      </a-marker>
+
+      <!-- Pannello informativo -->
+      <a-entity id="info" visible="false" position="0 0 2">
+        <!-- Sfondo del pannello info -->
+        <a-plane width="2.5" height="3" color="blue" position="0 0 0"></a-plane>
+        <a-text id="infoTitle" value="" position="0 1 0" align="center" color="white"></a-text>
+        <!-- Pulsante "Indietro" -->
+        <a-plane position="0 -1 0.01" width="1" height="0.3" color="red" onclick="showMenu()">
+          <a-text value="Indietro" align="center" position="0 0 0.1" color="white"></a-text>
         </a-plane>
       </a-entity>
-    </a-entity>
-  </a-marker>
-
-  <!-- Contenitore per il pannello informazioni -->
- 
-
-    <!-- Pulsante Indietro -->
-    <a-plane id="backButton" width="1" height="0.2" color="red" position="0 0.2 0" onclick="showMenu()">
-      <a-text value="Indietro" align="center"></a-text>
-    </a-plane>
-  </a-entity>
-</a-scene>
+    </a-scene>
+  </body>
+</html>
