@@ -24,29 +24,34 @@
       width="1" height="1.8"
       color="#222" opacity="0.8" visible="false">
 
-      <a-text value="Menu" color="#FFF"
-              position="0 0.75 0.02" align="center" width="1.2" scale="0.8 0.8 0.8"></a-text>
+      <!-- Rettangolo del titolo (per spostare il menu) -->
+      <a-plane id="titleBar"
+        position="0 0.75 0.02"
+        width="1" height="0.2"
+        color="#333" opacity="0.8">
+        <a-text value="Menu" color="#FFF" align="center" width="1.2" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
+      </a-plane>
 
       <!-- Container scorrevole -->
       <a-entity id="buttonContainer" position="0 0.3 0.02">
         <!-- Pulsanti con spaziatura e testo ridimensionato -->
         <a-plane class="menu-button" data-info="Pizza Classica" width="0.9" height="0.18" color="#FF4444" position="0 0.6 0.01">
-          <a-text value="Pizza Margherita" align="center" color="#FFF" scale="0.6 0.6 0.6" position="0 0 0.02"></a-text>
+          <a-text value="Pizza Margherita" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
         </a-plane>
         <a-plane class="menu-button" data-info="Lasagna" width="0.9" height="0.18" color="#44AAFF" position="0 0.35 0.01">
-          <a-text value="Lasagna" align="center" color="#FFF" scale="0.6 0.6 0.6" position="0 0 0.02"></a-text>
+          <a-text value="Lasagna" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
         </a-plane>
         <a-plane class="menu-button" data-info="Carbonara" width="0.9" height="0.18" color="#44FF88" position="0 0.1 0.01">
-          <a-text value="Carbonara" align="center" color="#FFF" scale="0.6 0.6 0.6" position="0 0 0.02"></a-text>
+          <a-text value="Carbonara" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
         </a-plane>
         <a-plane class="menu-button" data-info="Insalata Greca" width="0.9" height="0.18" color="#FFAA44" position="0 -0.15 0.01">
-          <a-text value="Insalata Greca" align="center" color="#FFF" scale="0.6 0.6 0.6" position="0 0 0.02"></a-text>
+          <a-text value="Insalata Greca" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
         </a-plane>
         <a-plane class="menu-button" data-info="Tiramisù" width="0.9" height="0.18" color="#AA44FF" position="0 -0.4 0.01">
-          <a-text value="Tiramisù" align="center" color="#FFF" scale="0.6 0.6 0.6" position="0 0 0.02"></a-text>
+          <a-text value="Tiramisù" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
         </a-plane>
         <a-plane class="menu-button" data-info="Filetto al Pepe" width="0.9" height="0.18" color="#FF4488" position="0 -0.65 0.01">
-          <a-text value="Filetto al Pepe" align="center" color="#FFF" scale="0.6 0.6 0.6" position="0 0 0.02"></a-text>
+          <a-text value="Filetto al Pepe" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
         </a-plane>
       </a-entity>
     </a-plane>
@@ -68,10 +73,13 @@ const menuPanel = document.querySelector("#menuPanel");
 const buttonContainer = document.querySelector("#buttonContainer");
 const buttons = document.querySelectorAll('.menu-button');
 const cursor = document.querySelector("#cursor");
+const titleBar = document.querySelector("#titleBar");
 
-// Variabili per gestire lo scroll touch
+// Variabili per gestire lo scroll touch e lo spostamento del menu
 let startY = null;
 let isScrolling = false;
+let isDraggingMenu = false;
+let menuStartPosition = { x: 0, y: 0, z: -2 };
 
 // Mostra il menu quando il marker è rilevato
 marker.addEventListener("markerFound", () => {
@@ -102,6 +110,34 @@ buttonContainer.addEventListener('touchend', () => {
   isScrolling = false;
 });
 
+// Gestione del tocco prolungato per spostare il menu
+titleBar.addEventListener('touchstart', e => {
+  isDraggingMenu = true;
+  menuStartPosition = menuPanel.object3D.position.clone(); // Salva la posizione iniziale
+});
+
+titleBar.addEventListener('touchmove', e => {
+  if (!isDraggingMenu) return;
+
+  const touch = e.touches[0];
+  const camera = document.querySelector("[camera]").object3D;
+  const worldPosition = new THREE.Vector3();
+
+  // Converti le coordinate del touch in coordinate 3D
+  worldPosition.set(
+    (touch.clientX / window.innerWidth) * 2 - 1,
+    -(touch.clientY / window.innerHeight) * 2 + 1,
+    0.5
+  ).unproject(camera);
+
+  // Aggiorna la posizione del menu
+  menuPanel.object3D.position.set(worldPosition.x, worldPosition.y, worldPosition.z);
+});
+
+titleBar.addEventListener('touchend', () => {
+  isDraggingMenu = false;
+});
+
 // Aggiorna la posizione del cursore in base al touch
 window.addEventListener('touchstart', e => {
   const touch = e.touches[0];
@@ -113,12 +149,12 @@ window.addEventListener('touchmove', e => {
   cursor.object3D.position.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight * 2 - 1), -1);
 });
 
-// Interazione con i pulsanti
+// Interazione con i pulsanti (selezione al rilascio del tocco)
 buttons.forEach(btn => {
   const originalColor = btn.getAttribute('color'); // Salva il colore originale
   btn.setAttribute('data-original-color', originalColor); // Memorizza il colore originale
 
-  btn.addEventListener('click', () => {
+  btn.addEventListener('touchend', () => {
     const dish = btn.getAttribute('data-info');
     btn.setAttribute('color', '#FF0000'); // Cambia colore al tocco
     setTimeout(() => {
