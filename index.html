@@ -17,7 +17,7 @@
   <a-scene embedded arjs vr-mode-ui="enabled: false">
     <a-marker preset="hiro" id="hiroMarker"></a-marker>
 
-    <!-- Pannello menu -->
+    <!-- Pannello menu principale -->
     <a-plane id="menuPanel"
       position="0 0 -2"
       rotation="-45 0 0"
@@ -35,25 +35,47 @@
       <!-- Container scorrevole -->
       <a-entity id="buttonContainer" position="0 0.3 0.02">
         <!-- Pulsanti con spaziatura e testo ridimensionato -->
-        <a-plane class="menu-button" data-info="Pizza Classica" width="0.9" height="0.18" color="#FF4444" position="0 0.6 0.01">
+        <a-plane class="menu-button" data-info="Pizza Classica" data-description="La classica pizza margherita con pomodoro, mozzarella e basilico." width="0.9" height="0.18" color="#FF4444" position="0 0.6 0.01">
           <a-text value="Pizza Margherita" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Lasagna" width="0.9" height="0.18" color="#44AAFF" position="0 0.35 0.01">
+        <a-plane class="menu-button" data-info="Lasagna" data-description="Lasagna al forno con ragù, besciamella e formaggio." width="0.9" height="0.18" color="#44AAFF" position="0 0.35 0.01">
           <a-text value="Lasagna" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Carbonara" width="0.9" height="0.18" color="#44FF88" position="0 0.1 0.01">
+        <a-plane class="menu-button" data-info="Carbonara" data-description="Spaghetti alla carbonara con uova, guanciale e pecorino." width="0.9" height="0.18" color="#44FF88" position="0 0.1 0.01">
           <a-text value="Carbonara" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Insalata Greca" width="0.9" height="0.18" color="#FFAA44" position="0 -0.15 0.01">
+        <a-plane class="menu-button" data-info="Insalata Greca" data-description="Insalata greca con pomodori, cetrioli, olive e feta." width="0.9" height="0.18" color="#FFAA44" position="0 -0.15 0.01">
           <a-text value="Insalata Greca" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Tiramisù" width="0.9" height="0.18" color="#AA44FF" position="0 -0.4 0.01">
+        <a-plane class="menu-button" data-info="Tiramisù" data-description="Il classico tiramisù con savoiardi, caffè e mascarpone." width="0.9" height="0.18" color="#AA44FF" position="0 -0.4 0.01">
           <a-text value="Tiramisù" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Filetto al Pepe" width="0.9" height="0.18" color="#FF4488" position="0 -0.65 0.01">
+        <a-plane class="menu-button" data-info="Filetto al Pepe" data-description="Filetto di manzo al pepe con salsa cremosa." width="0.9" height="0.18" color="#FF4488" position="0 -0.65 0.01">
           <a-text value="Filetto al Pepe" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
         </a-plane>
       </a-entity>
+    </a-plane>
+
+    <!-- Pannello di dettaglio (inizialmente nascosto) -->
+    <a-plane id="detailPanel"
+      position="0 0 -2"
+      rotation="-45 0 0"
+      width="1" height="1.8"
+      color="#222" opacity="0.8" visible="false">
+
+      <!-- Titolo del piatto -->
+      <a-text id="detailTitle" value="" color="#FFF" align="center" width="1.2" scale="0.5 0.5 0.5" position="0 0.75 0.02"></a-text>
+
+      <!-- Descrizione del piatto -->
+      <a-text id="detailDescription" value="" color="#FFF" align="center" width="0.9" scale="0.4 0.4 0.4" position="0 0.3 0.02" wrap-count="20"></a-text>
+
+      <!-- Pulsante per tornare al menu principale -->
+      <a-plane id="backButton"
+        position="0 -0.7 0.02"
+        width="0.6" height="0.18"
+        color="#333" opacity="0.8">
+        <a-text value="Torna al Menu" align="center" color="#FFF" scale="0.4 0.4 0.4" position="0 0 0.02"></a-text>
+      </a-plane>
     </a-plane>
 
     <!-- Camera con cursore invisibile e senza delay -->
@@ -74,6 +96,10 @@ const buttonContainer = document.querySelector("#buttonContainer");
 const buttons = document.querySelectorAll('.menu-button');
 const cursor = document.querySelector("#cursor");
 const titleBar = document.querySelector("#titleBar");
+const detailPanel = document.querySelector("#detailPanel");
+const detailTitle = document.querySelector("#detailTitle");
+const detailDescription = document.querySelector("#detailDescription");
+const backButton = document.querySelector("#backButton");
 
 // Variabili per gestire lo scroll touch e lo spostamento del menu
 let startY = null;
@@ -132,6 +158,7 @@ titleBar.addEventListener('touchmove', e => {
 
   // Aggiorna la posizione del menu
   menuPanel.object3D.position.set(worldPosition.x, worldPosition.y, worldPosition.z);
+  detailPanel.object3D.position.set(worldPosition.x, worldPosition.y, worldPosition.z); // Sposta anche il pannello di dettaglio
 });
 
 titleBar.addEventListener('touchend', () => {
@@ -151,18 +178,21 @@ window.addEventListener('touchmove', e => {
 
 // Interazione con i pulsanti (selezione al rilascio del tocco)
 buttons.forEach(btn => {
-  const originalColor = btn.getAttribute('color'); // Salva il colore originale
-  btn.setAttribute('data-original-color', originalColor); // Memorizza il colore originale
-
   btn.addEventListener('touchend', () => {
     const dish = btn.getAttribute('data-info');
-    btn.setAttribute('color', '#FF0000'); // Cambia colore al tocco
-    setTimeout(() => {
-      btn.setAttribute('color', btn.getAttribute('data-original-color')); // Ripristina colore originale dopo 200ms
-    }, 200);
+    const description = btn.getAttribute('data-description');
+
+    // Nascondi il menu principale e mostra il pannello di dettaglio
+    menuPanel.setAttribute("visible", "false");
+    detailPanel.setAttribute("visible", "true");
+
+    // Imposta il titolo e la descrizione nel pannello di dettaglio
+    detailTitle.setAttribute("value", dish);
+    detailDescription.setAttribute("value", description);
   });
 });
-</script>
 
-</body>
-</html>
+// Pulsante per tornare al menu principale
+backButton.addEventListener('touchend', () => {
+  detailPanel.setAttribute("visible", "false");
+  menuPanel
