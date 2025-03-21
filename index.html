@@ -74,22 +74,55 @@ const menuPanel = document.querySelector("#menuPanel");
 const buttonContainer = document.querySelector("#buttonContainer");
 const buttons = document.querySelectorAll('.menu-button');
 
+// Variabili per gestire lo scroll touch
+let startY = null;
+let isScrolling = false;
+
+// Mostra il menu quando il marker è rilevato
 marker.addEventListener("markerFound", () => {
   menuPanel.setAttribute("visible", "true");
-  info.innerText = "Marker trovato!";
+  info.innerText = "Marker trovato! Tocca e scorri il menu.";
 });
 
-// Scroll del menu touch
-let startY = null;
+// Nascondi il menu quando il marker è perso
+marker.addEventListener("markerLost", () => {
+  menuPanel.setAttribute("visible", "false");
+  info.innerText = "Inquadra il marker...";
+});
+
+// Gestione dello scroll touch
 buttonContainer.addEventListener('touchstart', e => {
   startY = e.touches[0].clientY;
+  isScrolling = true;
 });
+
 buttonContainer.addEventListener('touchmove', e => {
-  if (startY === null) return;
+  if (!isScrolling) return;
+
   let deltaY = (e.touches[0].clientY - startY) * 0.003;
   let pos = buttonContainer.object3D.position;
-  pos.y = Math.min(Math.max(pos.y + deltaY, -0.5), 1.2);
+  pos.y = Math.min(Math.max(pos.y + deltaY, -0.5), 1.2); // Limita lo scroll
   startY = e.touches[0].clientY;
+});
+
+buttonContainer.addEventListener('touchend', () => {
+  isScrolling = false;
+});
+
+// Interazione con i pulsanti
+buttons.forEach(btn => {
+  const originalColor = btn.getAttribute('color'); // Salva il colore originale
+  btn.setAttribute('data-original-color', originalColor); // Memorizza il colore originale
+
+  btn.addEventListener('touchstart', () => {
+    const dish = btn.getAttribute('data-info');
+    info.innerText = "Hai selezionato: " + dish;
+    btn.setAttribute('color', '#FF0000'); // Cambia colore al tocco
+  });
+
+  btn.addEventListener('touchend', () => {
+    btn.setAttribute('color', btn.getAttribute('data-original-color')); // Ripristina colore originale
+  });
 });
 
 // Spostamento cursore su touch
@@ -100,14 +133,6 @@ window.addEventListener('touchstart', function(e) {
     clientY: e.touches[0].clientY
   });
 }, false);
-
-// Interazione immediata ai pulsanti
-buttons.forEach(btn => {
-  btn.addEventListener('click', evt => {
-    const dish = btn.getAttribute('data-info');
-    info.innerText = "Hai selezionato: " + dish;
-  });
-});
 </script>
 
 </body>
