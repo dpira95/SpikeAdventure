@@ -36,7 +36,7 @@
       id="draggableRect" 
       position="0 0 -2"
       rotation="-45 0 0" 
-      width="0.5" height="1" 
+      width="1" height="3" 
       color="#7BC8A4"
       visible="false"
       cursor-listener>
@@ -49,83 +49,50 @@
   </a-scene>
 
   <script>
-const marker = document.querySelector("#hiroMarker");
-const info = document.getElementById("info");
-const rect = document.querySelector("#draggableRect");
-let isDragging = false;
-let previousMousePosition = { x: 0, y: 0 };
+    const marker = document.querySelector("#hiroMarker");
+    const info = document.getElementById("info");
+    const rect = document.querySelector("#draggableRect");
+    let isDragging = false;
 
-marker.addEventListener("markerFound", () => {
-  info.innerText = "Marker rilevato!";
-  rect.setAttribute("visible", "true");
-});
+    marker.addEventListener("markerFound", () => {
+      info.innerText = "Marker rilevato!";
+      rect.setAttribute("visible", "true");
+    });
 
-marker.addEventListener("markerLost", () => {
-  info.innerText = "Marker perso, puoi spostare il rettangolo.";
-});
+    marker.addEventListener("markerLost", () => {
+      info.innerText = "Marker perso, puoi spostare il rettangolo.";
+    });
 
-// Mouse events (desktop)
-rect.addEventListener('mousedown', (e) => {
-  isDragging = true;
-  previousMousePosition = { x: e.clientX, y: e.clientY };
-});
+    // Gestisci il trascinamento
+    rect.addEventListener('mousedown', () => { isDragging = true; });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
 
-window.addEventListener('mouseup', () => {
-  isDragging = false;
-});
+      // Normalizza le coordinate del mouse
+      let sceneEl = document.querySelector('a-scene');
+      let camera = sceneEl.camera;
+      let rectPos = rect.object3D.position;
 
-window.addEventListener('mousemove', (e) => {
-  if (!isDragging) return;
+      let movementX = e.movementX / 200;
+      let movementY = e.movementY / 200;
 
-  let deltaX = (e.clientX - previousMousePosition.x) / 250;
-  let deltaY = (e.clientY - previousMousePosition.y) / 250;
+      rectPos.x += movementX;
+      rectPos.y -= movementY; // Invertito per un movimento naturale
+    });
 
-  let position = rect.getAttribute('position');
-  rect.setAttribute('position', {
-    x: position.x + deltaX,
-    y: position.y - deltaY,
-    z: position.z
-  });
+    // Supporto touch mobile
+    window.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      let touch = e.touches[0];
 
-  previousMousePosition = { x: e.clientX, y: e.clientY };
-});
+      let movementX = touch.clientX - window.innerWidth / 2;
+      let movementY = touch.clientY - window.innerHeight / 2;
 
-// Touch events (mobile)
-rect.addEventListener('touchstart', (e) => {
-  if (e.touches.length == 1) {
-    isDragging = true;
-    previousMousePosition = {
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY
-    };
-  }
-});
-
-window.addEventListener('touchend', () => {
-  isDragging = false;
-});
-
-window.addEventListener('touchmove', (e) => {
-  if (!isDragging || e.touches.length != 1) return;
-
-  e.preventDefault();
-
-  let deltaX = (e.touches[0].clientX - previousMousePosition.x) / 250;
-  let deltaY = (e.touches[0].clientY - previousMousePosition.y) / 250;
-
-  let position = rect.getAttribute('position');
-  rect.setAttribute('position', {
-    x: position.x + deltaX,
-    y: position.y - deltaY,
-    z: position.z
-  });
-
-  previousMousePosition = {
-    x: e.touches[0].clientX,
-    y: e.touches[0].clientY
-  };
-}, { passive: false });
-</script>
-
+      rect.object3D.position.x = movementX / 300;
+      rect.object3D.position.y = -movementY / 300;
+    }, { passive: false });
+  </script>
 </body>
 </html>
