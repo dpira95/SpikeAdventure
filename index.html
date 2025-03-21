@@ -6,23 +6,14 @@
   <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
 
   <style>
-    .message {
-      position: fixed;
-      bottom: 20px; left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 18px;
-      background-color: rgba(0,0,0,0.6);
-      color: white; font-family: Arial;
-      border-radius: 10px;
-      z-index: 9999; user-select: none;
-      pointer-events: none;
+    body {
+      margin: 0;
+      overflow: hidden;
     }
   </style>
 </head>
 
-<body style="margin: 0; overflow: hidden;">
-  <div id="info" class="message">Inquadra il marker...</div>
-
+<body>
   <a-scene embedded arjs vr-mode-ui="enabled: false">
     <a-marker preset="hiro" id="hiroMarker"></a-marker>
 
@@ -30,49 +21,53 @@
     <a-plane id="menuPanel"
       position="0 0 -2"
       rotation="-45 0 0"
-      width="1" height="1.5"
+      width="1" height="1.8"
       color="#222" opacity="0.8" visible="false">
 
       <a-text value="Menu" color="#FFF"
-              position="0 0.65 0.02" align="center" width="1.2"></a-text>
+              position="0 0.75 0.02" align="center" width="1.2" scale="0.8 0.8 0.8"></a-text>
 
       <!-- Container scorrevole -->
       <a-entity id="buttonContainer" position="0 0.3 0.02">
-        <!-- Esempio di pulsanti aggiunti per test scroll -->
-        <a-plane class="menu-button" data-info="Pizza Classica" width="0.9" height="0.2" color="#FF4444" position="0 0.8 0.01">
-          <a-text value="Pizza Margherita" align="center" color="#FFF"></a-text>
+        <!-- Pulsanti con spaziatura e testo ridimensionato -->
+        <a-plane class="menu-button" data-info="Pizza Classica" width="0.9" height="0.18" color="#FF4444" position="0 0.6 0.01">
+          <a-text value="Pizza Margherita" align="center" color="#FFF" scale="0.6 0.6 0.6" position="0 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Lasagna" width="0.9" height="0.2" color="#44AAFF" position="0 0.5 0.01">
-          <a-text value="Lasagna" align="center" color="#FFF"></a-text>
+        <a-plane class="menu-button" data-info="Lasagna" width="0.9" height="0.18" color="#44AAFF" position="0 0.35 0.01">
+          <a-text value="Lasagna" align="center" color="#FFF" scale="0.6 0.6 0.6" position="0 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Carbonara" width="0.9" height="0.2" color="#44FF88" position="0 0.2 0.01">
-          <a-text value="Carbonara" align="center" color="#FFF"></a-text>
+        <a-plane class="menu-button" data-info="Carbonara" width="0.9" height="0.18" color="#44FF88" position="0 0.1 0.01">
+          <a-text value="Carbonara" align="center" color="#FFF" scale="0.6 0.6 0.6" position="0 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Insalata Greca" width="0.9" height="0.2" color="#FFAA44" position="0 -0.1 0.01">
-          <a-text value="Insalata Greca" align="center" color="#FFF"></a-text>
+        <a-plane class="menu-button" data-info="Insalata Greca" width="0.9" height="0.18" color="#FFAA44" position="0 -0.15 0.01">
+          <a-text value="Insalata Greca" align="center" color="#FFF" scale="0.6 0.6 0.6" position="0 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Tiramisù" width="0.9" height="0.2" color="#AA44FF" position="0 -0.4 0.01">
-          <a-text value="Tiramisù" align="center" color="#FFF"></a-text>
+        <a-plane class="menu-button" data-info="Tiramisù" width="0.9" height="0.18" color="#AA44FF" position="0 -0.4 0.01">
+          <a-text value="Tiramisù" align="center" color="#FFF" scale="0.6 0.6 0.6" position="0 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Filetto al Pepe" width="0.9" height="0.2" color="#FF4488" position="0 -0.7 0.01">
-          <a-text value="Filetto al Pepe" align="center" color="#FFF"></a-text>
+        <a-plane class="menu-button" data-info="Filetto al Pepe" width="0.9" height="0.18" color="#FF4488" position="0 -0.65 0.01">
+          <a-text value="Filetto al Pepe" align="center" color="#FFF" scale="0.6 0.6 0.6" position="0 0 0.02"></a-text>
         </a-plane>
       </a-entity>
     </a-plane>
 
-    <!-- Camera con cursore invisibile -->
+    <!-- Camera con cursore invisibile e senza delay -->
     <a-entity camera>
-      <a-cursor rayOrigin="mouse" fuse="false" material="opacity: 0;"></a-cursor>
+      <a-cursor id="cursor"
+                rayOrigin="mouse"
+                fuse="false"
+                material="opacity: 0;"
+                position="0 0 -1">
+      </a-cursor>
     </a-entity>
-
   </a-scene>
 
 <script>
 const marker = document.querySelector("#hiroMarker");
-const info = document.getElementById("info");
 const menuPanel = document.querySelector("#menuPanel");
 const buttonContainer = document.querySelector("#buttonContainer");
 const buttons = document.querySelectorAll('.menu-button');
+const cursor = document.querySelector("#cursor");
 
 // Variabili per gestire lo scroll touch
 let startY = null;
@@ -81,13 +76,11 @@ let isScrolling = false;
 // Mostra il menu quando il marker è rilevato
 marker.addEventListener("markerFound", () => {
   menuPanel.setAttribute("visible", "true");
-  info.innerText = "Marker trovato! Tocca e scorri il menu.";
 });
 
-// Nascondi il menu quando il marker è perso
+// Il menu rimane visibile anche se il marker è perso
 marker.addEventListener("markerLost", () => {
-  menuPanel.setAttribute("visible", "false");
-  info.innerText = "Inquadra il marker...";
+  // Non fare nulla: il menu rimane visibile
 });
 
 // Gestione dello scroll touch
@@ -101,7 +94,7 @@ buttonContainer.addEventListener('touchmove', e => {
 
   let deltaY = (e.touches[0].clientY - startY) * 0.003;
   let pos = buttonContainer.object3D.position;
-  pos.y = Math.min(Math.max(pos.y + deltaY, -0.5), 1.2); // Limita lo scroll
+  pos.y = Math.min(Math.max(pos.y + deltaY, -0.8), 1.0); // Limita lo scroll
   startY = e.touches[0].clientY;
 });
 
@@ -109,30 +102,30 @@ buttonContainer.addEventListener('touchend', () => {
   isScrolling = false;
 });
 
+// Aggiorna la posizione del cursore in base al touch
+window.addEventListener('touchstart', e => {
+  const touch = e.touches[0];
+  cursor.object3D.position.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight * 2 - 1), -1);
+});
+
+window.addEventListener('touchmove', e => {
+  const touch = e.touches[0];
+  cursor.object3D.position.set(touch.clientX / window.innerWidth * 2 - 1, -(touch.clientY / window.innerHeight * 2 - 1), -1);
+});
+
 // Interazione con i pulsanti
 buttons.forEach(btn => {
   const originalColor = btn.getAttribute('color'); // Salva il colore originale
   btn.setAttribute('data-original-color', originalColor); // Memorizza il colore originale
 
-  btn.addEventListener('touchstart', () => {
+  btn.addEventListener('click', () => {
     const dish = btn.getAttribute('data-info');
-    info.innerText = "Hai selezionato: " + dish;
     btn.setAttribute('color', '#FF0000'); // Cambia colore al tocco
-  });
-
-  btn.addEventListener('touchend', () => {
-    btn.setAttribute('color', btn.getAttribute('data-original-color')); // Ripristina colore originale
+    setTimeout(() => {
+      btn.setAttribute('color', btn.getAttribute('data-original-color')); // Ripristina colore originale dopo 200ms
+    }, 200);
   });
 });
-
-// Spostamento cursore su touch
-window.addEventListener('touchstart', function(e) {
-  let cursor = document.querySelector('[cursor]');
-  cursor.components.cursor.onMouseMove({
-    clientX: e.touches[0].clientX,
-    clientY: e.touches[0].clientY
-  });
-}, false);
 </script>
 
 </body>
