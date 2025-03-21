@@ -1,40 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AR.js Hiro Marker - Esempio base funzionante</title>
-  <!-- Libreria A-Frame -->
+  <title>AR.js con A-Frame - Piano Base</title>
+  <!-- Includi A-Frame -->
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-  <!-- Libreria AR.js (versione stabile aggiornata) -->
+  <!-- Includi AR.js per A-Frame con supporto per Marker Tracking -->
   <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
-  
-  <style>
-    body, html {
-      margin: 0;
-      overflow: hidden; /* per rimuovere barre di scorrimento */
-    }
-  </style>
 </head>
-
-<body>
-  <a-scene embedded arjs="
-    trackingMethod: marker;
-    sourceType: webcam;
-    sourceWidth: 1280;
-    sourceHeight: 720;
-    displayWidth: 1280;
-    displayHeight: 720;
-    debugUIEnabled: true;">
-    
-    <!-- Marker Hiro -->
+<body style="margin: 0; overflow: hidden;">
+  <a-scene embedded arjs>
+    <!-- Definisci il marker "hiro" -->
     <a-marker preset="hiro">
-      <!-- Piano base visibile sopra il marker -->
-      <a-plane position="0 0 0" rotation="-90 0 0" width="1" height="1" color="#7BC8A4">
-      </a-plane>
+      <!-- Aggiungi un piano 2D sopra il marker -->
+      <a-plane position="0 0 0" rotation="-90 0 0" width="1" height="1" color="#7BC8A4"></a-plane>
     </a-marker>
-
-    <!-- Camera della scena -->
+    <!-- Definisci la fotocamera -->
     <a-entity camera></a-entity>
-
   </a-scene>
 </body>
 </html>
