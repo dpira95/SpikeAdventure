@@ -36,7 +36,7 @@
       id="draggableRect" 
       position="0 0 -2"
       rotation="-45 0 0" 
-      width="1" height="3" 
+      width="0.5" height="1.5" 
       color="#7BC8A4"
       visible="false"
       cursor-listener>
@@ -93,6 +93,42 @@
       rect.object3D.position.x = movementX / 300;
       rect.object3D.position.y = -movementY / 300;
     }, { passive: false });
+    // Variabili globali
+let initialDistance = null;
+let initialScale = 1;
+
+// Listener per il pinch-to-zoom
+window.addEventListener('touchmove', function(e) {
+  if (e.touches.length == 2) {
+    e.preventDefault();
+
+    // calcola distanza corrente tra due dita
+    let touch1 = e.touches[0];
+    let touch2 = e.touches[1];
+    let currentDistance = Math.hypot(
+      touch2.pageX - touch1.pageX,
+      touch2.pageY - touch1.pageY
+    );
+
+    if (!initialDistance) {
+      initialDistance = currentDistance;
+      initialScale = rect.object3D.scale.x; // supponendo scala uniforme
+    } else {
+      let scaleFactor = currentDistance / initialDistance;
+      rect.object3D.scale.set(
+        initialScale * scaleFactor,
+        initialScale * scaleFactor,
+        initialScale * scaleFactor
+      );
+    }
+  }
+}, { passive: false });
+
+// Reset al rilascio
+window.addEventListener('touchend', function(e) {
+  if (e.touches.length < 2) initialDistance = null;
+});
+
   </script>
 </body>
 </html>
