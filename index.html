@@ -1,88 +1,90 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AR.js - Menu AR Scrollabile e Tocco Diretto</title>
+  <title>AR.js - Menu Completo con Dettagli Piatti (Touch)</title>
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
 
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
+    .message {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 18px;
+      background-color: rgba(0,0,0,0.6);
+      color: white;
+      font-family: Arial, sans-serif;
+      border-radius: 10px;
+      z-index: 9999;
+      user-select: none;
+      pointer-events: none;
     }
   </style>
 </head>
 
-<body>
-  <a-scene embedded arjs vr-mode-ui="enabled: false">
+<body style="margin: 0; overflow: hidden;">
+  <div id="info" class="message">Inquadra il marker...</div>
+
+  <a-scene embedded arjs>
     <a-marker preset="hiro" id="hiroMarker"></a-marker>
 
-    <!-- Pannello menu principale -->
+    <!-- MENU PRINCIPALE -->
     <a-plane id="menuPanel"
       position="0 0 -2"
       rotation="-45 0 0"
-      width="1" height="1.8"
-      color="#222" opacity="0.8" visible="false">
+      width="1" height="1.5"
+      color="#222"
+      opacity="0.8"
+      visible="false">
 
-      <!-- Rettangolo del titolo (per spostare il menu) -->
-      <a-plane id="titleBar"
-        position="0 0.75 0.02"
-        width="1" height="0.2"
-        color="#333" opacity="0.8">
-        <a-text value="Menu" color="#FFF" align="center" width="1.2" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
-      </a-plane>
+      <a-text value="Menu" color="#FFFFFF"
+              position="0 0.65 0.02" align="center" width="1.2"></a-text>
 
-      <!-- Container scorrevole -->
-      <a-entity id="buttonContainer" position="0 0.3 0.02">
-        <!-- Pulsanti con spaziatura e testo ridimensionato -->
-        <a-plane class="menu-button" data-info="Pizza Classica" data-description="La classica pizza margherita con pomodoro, mozzarella e basilico." width="0.9" height="0.18" color="#FF4444" position="0 0.6 0.01">
-          <a-text value="Pizza Margherita" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
+      <!-- Container scrollabile -->
+      <a-entity id="buttonContainer" position="0 0 0.01">
+        <!-- Pulsanti menu -->
+        <a-plane class="menu-button" data-info="Classica e gustosa" width="0.9" height="0.2" color="#FF4444" position="0 0.5 0.01">
+          <a-text value="Pizza Margherita" align="left" width="0.8" color="#FFF" position="-0.4 0 0.02"></a-text>
+          <a-text value="6,50 €" align="right" width="0.8" color="#FFF" position="0.4 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Lasagna" data-description="Lasagna al forno con ragù, besciamella e formaggio." width="0.9" height="0.18" color="#44AAFF" position="0 0.35 0.01">
-          <a-text value="Lasagna" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
+        <a-plane class="menu-button" data-info="Piatto tradizionale" width="0.9" height="0.2" color="#44AAFF" position="0 0.2 0.01">
+          <a-text value="Lasagna" align="left" width="0.8" color="#FFF" position="-0.4 0 0.02"></a-text>
+          <a-text value="8,00 €" align="right" width="0.8" color="#FFF" position="0.4 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Carbonara" data-description="Spaghetti alla carbonara con uova, guanciale e pecorino." width="0.9" height="0.18" color="#44FF88" position="0 0.1 0.01">
-          <a-text value="Carbonara" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
+        <a-plane class="menu-button" data-info="Fresca e leggera" width="0.9" height="0.2" color="#44FF88" position="0 -0.1 0.01">
+          <a-text value="Insalata Greca" align="left" width="0.8" color="#FFF" position="-0.4 0 0.02"></a-text>
+          <a-text value="7,00 €" align="right" width="0.8" color="#FFF" position="0.4 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Insalata Greca" data-description="Insalata greca con pomodori, cetrioli, olive e feta." width="0.9" height="0.18" color="#FFAA44" position="0 -0.15 0.01">
-          <a-text value="Insalata Greca" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
+        <a-plane class="menu-button" data-info="Ricetta romana" width="0.9" height="0.2" color="#FFAA44" position="0 -0.4 0.01">
+          <a-text value="Carbonara" align="left" width="0.8" color="#FFF" position="-0.4 0 0.02"></a-text>
+          <a-text value="9,50 €" align="right" width="0.8" color="#FFF" position="0.4 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Tiramisù" data-description="Il classico tiramisù con savoiardi, caffè e mascarpone." width="0.9" height="0.18" color="#AA44FF" position="0 -0.4 0.01">
-          <a-text value="Tiramisù" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
+        <a-plane class="menu-button" data-info="Dolce artigianale" width="0.9" height="0.2" color="#AA44FF" position="0 -0.7 0.01">
+          <a-text value="Tiramisù" align="left" width="0.8" color="#FFF" position="-0.4 0 0.02"></a-text>
+          <a-text value="5,00 €" align="right" width="0.8" color="#FFF" position="0.4 0 0.02"></a-text>
         </a-plane>
-        <a-plane class="menu-button" data-info="Filetto al Pepe" data-description="Filetto di manzo al pepe con salsa cremosa." width="0.9" height="0.18" color="#FF4488" position="0 -0.65 0.01">
-          <a-text value="Filetto al Pepe" align="center" color="#FFF" scale="0.5 0.5 0.5" position="0 0 0.02"></a-text>
+        <a-plane class="menu-button" data-info="Specialità dello chef" width="0.9" height="0.2" color="#FF4488" position="0 -1 0.01">
+          <a-text value="Filetto al pepe" align="left" width="0.8" color="#FFF" position="-0.4 0 0.02"></a-text>
+          <a-text value="12,00 €" align="right" width="0.8" color="#FFF" position="0.4 0 0.02"></a-text>
         </a-plane>
       </a-entity>
     </a-plane>
 
-    <!-- Pannello di dettaglio (inizialmente nascosto) -->
-    <a-plane id="detailPanel"
-      position="0 0 -2"
-      rotation="-45 0 0"
-      width="1" height="1.8"
-      color="#222" opacity="0.8" visible="false">
-
-      <!-- Titolo del piatto -->
-      <a-text id="detailTitle" value="" color="#FFF" align="center" width="1.2" scale="0.5 0.5 0.5" position="0 0.75 0.02"></a-text>
-
-      <!-- Descrizione del piatto -->
-      <a-text id="detailDescription" value="" color="#FFF" align="center" width="0.9" scale="0.4 0.4 0.4" position="0 0.3 0.02" wrap-count="20"></a-text>
-
-      <!-- Pulsante per tornare al menu principale -->
-      <a-plane id="backButton"
-        position="0 -0.7 0.02"
-        width="0.6" height="0.18"
-        color="#333" opacity="0.8">
-        <a-text value="Torna al Menu" align="center" color="#FFF" scale="0.4 0.4 0.4" position="0 0 0.02"></a-text>
+    <!-- PANEL DETTAGLIO -->
+    <a-plane id="detailPanel" position="0 0 -1.8" rotation="-45 0 0" width="1" height="0.7" color="#333" opacity="0.9" visible="false">
+      <a-text id="detailText" value="" color="#FFF" position="0 0.1 0.02" align="center" width="0.9"></a-text>
+      <a-plane id="closeBtn" color="#990000" width="0.4" height="0.15" position="0 -0.2 0.01">
+        <a-text value="Chiudi" align="center" color="#FFF" width="0.8" position="0 0 0.02"></a-text>
       </a-plane>
     </a-plane>
 
-    <!-- Camera con cursore invisibile e senza delay -->
+    <!-- Camera con cursore invisibile -->
     <a-entity camera>
       <a-cursor id="cursor"
                 rayOrigin="mouse"
-                fuse="false"
+                fuse="true"
+                fuse-timeout="0" <!-- Nessun delay -->
                 material="opacity: 0;"
                 position="0 0 -1">
       </a-cursor>
@@ -91,78 +93,26 @@
 
 <script>
 const marker = document.querySelector("#hiroMarker");
+const info = document.getElementById("info");
 const menuPanel = document.querySelector("#menuPanel");
+const detailPanel = document.querySelector("#detailPanel");
+const detailText = document.querySelector("#detailText");
+const closeBtn = document.querySelector("#closeBtn");
 const buttonContainer = document.querySelector("#buttonContainer");
 const buttons = document.querySelectorAll('.menu-button');
 const cursor = document.querySelector("#cursor");
-const titleBar = document.querySelector("#titleBar");
-const detailPanel = document.querySelector("#detailPanel");
-const detailTitle = document.querySelector("#detailTitle");
-const detailDescription = document.querySelector("#detailDescription");
-const backButton = document.querySelector("#backButton");
-
-// Variabili per gestire lo scroll touch e lo spostamento del menu
-let startY = null;
-let isScrolling = false;
-let isDraggingMenu = false;
-let menuStartPosition = { x: 0, y: 0, z: -2 };
 
 // Mostra il menu quando il marker è rilevato
 marker.addEventListener("markerFound", () => {
+  info.innerText = "Marker trovato!";
   menuPanel.setAttribute("visible", "true");
 });
 
-// Il menu rimane visibile anche se il marker è perso
+// Nascondi il menu quando il marker è perso
 marker.addEventListener("markerLost", () => {
-  // Non fare nulla: il menu rimane visibile
-});
-
-// Gestione dello scroll touch
-buttonContainer.addEventListener('touchstart', e => {
-  startY = e.touches[0].clientY;
-  isScrolling = true;
-});
-
-buttonContainer.addEventListener('touchmove', e => {
-  if (!isScrolling) return;
-
-  let deltaY = (e.touches[0].clientY - startY) * 0.003;
-  let pos = buttonContainer.object3D.position;
-  pos.y = Math.min(Math.max(pos.y + deltaY, -0.8), 1.0); // Limita lo scroll
-  startY = e.touches[0].clientY;
-});
-
-buttonContainer.addEventListener('touchend', () => {
-  isScrolling = false;
-});
-
-// Gestione del tocco prolungato per spostare il menu
-titleBar.addEventListener('touchstart', e => {
-  isDraggingMenu = true;
-  menuStartPosition = menuPanel.object3D.position.clone(); // Salva la posizione iniziale
-});
-
-titleBar.addEventListener('touchmove', e => {
-  if (!isDraggingMenu) return;
-
-  const touch = e.touches[0];
-  const camera = document.querySelector("[camera]").object3D;
-  const worldPosition = new THREE.Vector3();
-
-  // Converti le coordinate del touch in coordinate 3D
-  worldPosition.set(
-    (touch.clientX / window.innerWidth) * 2 - 1,
-    -(touch.clientY / window.innerHeight) * 2 + 1,
-    0.5
-  ).unproject(camera);
-
-  // Aggiorna la posizione del menu
-  menuPanel.object3D.position.set(worldPosition.x, worldPosition.y, worldPosition.z);
-  detailPanel.object3D.position.set(worldPosition.x, worldPosition.y, worldPosition.z); // Sposta anche il pannello di dettaglio
-});
-
-titleBar.addEventListener('touchend', () => {
-  isDraggingMenu = false;
+  info.innerText = "Inquadra il marker...";
+  menuPanel.setAttribute("visible", "false");
+  detailPanel.setAttribute("visible", "false");
 });
 
 // Aggiorna la posizione del cursore in base al touch
@@ -179,20 +129,37 @@ window.addEventListener('touchmove', e => {
 // Interazione con i pulsanti (selezione al rilascio del tocco)
 buttons.forEach(btn => {
   btn.addEventListener('touchend', () => {
-    const dish = btn.getAttribute('data-info');
-    const description = btn.getAttribute('data-description');
-
-    // Nascondi il menu principale e mostra il pannello di dettaglio
-    menuPanel.setAttribute("visible", "false");
-    detailPanel.setAttribute("visible", "true");
-
-    // Imposta il titolo e la descrizione nel pannello di dettaglio
-    detailTitle.setAttribute("value", dish);
-    detailDescription.setAttribute("value", description);
+    const dish = btn.querySelector('a-text').getAttribute('value');
+    const desc = btn.getAttribute('data-info');
+    detailText.setAttribute('value', dish + "\n" + desc);
+    menuPanel.setAttribute('visible', false);
+    detailPanel.setAttribute('visible', true);
   });
 });
 
-// Pulsante per tornare al menu principale
-backButton.addEventListener('touchend', () => {
-  detailPanel.setAttribute("visible", "false");
-  menuPanel
+// Pulsante per chiudere il pannello di dettaglio
+closeBtn.addEventListener('touchend', () => {
+  detailPanel.setAttribute('visible', false);
+  menuPanel.setAttribute('visible', true);
+});
+
+// Scroll con touch
+let startY = null;
+buttonContainer.addEventListener('touchstart', e => {
+  startY = e.touches[0].clientY;
+});
+
+buttonContainer.addEventListener('touchmove', e => {
+  if (startY === null) return;
+  let deltaY = (e.touches[0].clientY - startY) * 0.003;
+  let pos = buttonContainer.object3D.position;
+  pos.y = Math.min(Math.max(pos.y + deltaY, -0.5), 0.5);
+  startY = e.touches[0].clientY;
+});
+
+buttonContainer.addEventListener('touchend', () => {
+  startY = null;
+});
+</script>
+</body>
+</html>
