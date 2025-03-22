@@ -1,14 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AR.js - Menu Completo con Dettagli Piatti</title>
+  <title>AR.js - Menu Completo con UI Sovrapposta</title>
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
 
   <style>
+    /* Stile per l'UI sovrapposta */
+    #ui {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none; /* Permette di interagire con la scena 3D */
+      z-index: 10;
+    }
+    #ui button {
+      pointer-events: auto; /* Abilita l'interazione con i pulsanti */
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
     .message {
       position: fixed;
-      bottom: 20px;
+      bottom: 60px; /* Spostato più in alto per fare spazio al pulsante */
       left: 50%;
       transform: translateX(-50%);
       padding: 12px 18px;
@@ -23,8 +46,7 @@
 </head>
 
 <body style="margin: 0; overflow: hidden;">
-  <div id="info" class="message">Inquadra il marker...</div>
-
+  <!-- Scena A-Frame -->
   <a-scene embedded arjs>
     <a-marker preset="hiro" id="hiroMarker"></a-marker>
 
@@ -39,9 +61,6 @@
 
       <a-text value="Menu" color="#FFFFFF"
               position="0 0.65 0.01" align="center" width="1.2"></a-text>
-
-      <!-- MASCHERA menu (per effetto sfumatura) -->
-      <a-plane width="1" height="1.2" position="0 0 0.005" material="shader:flat; transparent:true; opacity:0.9; color:#222"></a-plane>
 
       <!-- Scroll Container con pulsanti piatti -->
       <a-entity id="buttonContainer" position="0 0 0.01">
@@ -86,14 +105,6 @@
       </a-plane>
     </a-plane>
 
-    <!-- Cursore personalizzato -->
-    <a-entity id="customCursor"
-              geometry="primitive: circle; radius: 0.02"
-              material="color: yellow; shader: flat"
-              position="0 0 -1"
-              visible="false">
-    </a-entity>
-
     <!-- Camera -->
     <a-entity camera look-controls>
       <a-cursor id="cursor"
@@ -105,114 +116,57 @@
     </a-entity>
   </a-scene>
 
-<script>
-const marker = document.querySelector("#hiroMarker");
-const info = document.getElementById("info");
-const menuPanel = document.querySelector("#menuPanel");
-const detailPanel = document.querySelector("#detailPanel");
-const detailText = document.querySelector("#detailText");
-const closeBtn = document.querySelector("#closeBtn");
-const buttonContainer = document.querySelector("#buttonContainer");
-const buttons = document.querySelectorAll('.menu-button');
-const customCursor = document.querySelector("#customCursor");
+  <!-- UI sovrapposta -->
+  <div id="ui">
+    <div id="info" class="message">Inquadra il marker...</div>
+    <button id="actionButton">Apri Menu</button>
+  </div>
 
-// Variabili per gestire scroll e trascinamento
-let isMarkerFound = false, isDraggingPanel = false;
-let startPressTimer, longPressActive = false;
-let prevPosition = { x: 0, y: 0 };
+  <script>
+    const marker = document.querySelector("#hiroMarker");
+    const info = document.getElementById("info");
+    const menuPanel = document.querySelector("#menuPanel");
+    const detailPanel = document.querySelector("#detailPanel");
+    const detailText = document.querySelector("#detailText");
+    const closeBtn = document.querySelector("#closeBtn");
+    const buttonContainer = document.querySelector("#buttonContainer");
+    const buttons = document.querySelectorAll('.menu-button');
+    const actionButton = document.getElementById('actionButton');
 
-// Rilevamento marker
-marker.addEventListener("markerFound", () => {
-  isMarkerFound = true;
-  info.innerText = "Marker trovato!";
-  menuPanel.setAttribute("visible", "true");
-  customCursor.setAttribute("visible", "true");
-});
+    // Rilevamento marker
+    marker.addEventListener("markerFound", () => {
+      info.innerText = "Marker trovato!";
+      menuPanel.setAttribute("visible", "true");
+      actionButton.style.display = 'block'; // Mostra il pulsante
+    });
 
-marker.addEventListener("markerLost", () => {
-  info.innerText = "Marker perso, puoi interagire col menu.";
-  customCursor.setAttribute("visible", "false");
-});
+    marker.addEventListener("markerLost", () => {
+      info.innerText = "Marker perso, puoi interagire col menu.";
+      actionButton.style.display = 'none'; // Nascondi il pulsante
+    });
 
-// Aggiorna la posizione del cursore personalizzato in base al touch
-window.addEventListener('touchstart', e => {
-  const touch = e.touches[0];
-  updateCursorPosition(touch);
-});
+    // Gestione del pulsante "Apri Menu"
+    actionButton.addEventListener('click', () => {
+      menuPanel.setAttribute('visible', true);
+      detailPanel.setAttribute('visible', false);
+    });
 
-window.addEventListener('touchmove', e => {
-  const touch = e.touches[0];
-  updateCursorPosition(touch);
-});
+    // Click sui pulsanti del menu
+    buttons.forEach(btn => {
+      btn.addEventListener('click', evt => {
+        const dish = btn.querySelector('a-text').getAttribute('value');
+        const desc = btn.getAttribute('data-info');
+        detailText.setAttribute('value', dish + "\n" + desc);
+        menuPanel.setAttribute('visible', false);
+        detailPanel.setAttribute('visible', true);
+      });
+    });
 
-// Simula la selezione al rilascio del tocco
-window.addEventListener('touchend', () => {
-  const cursorPosition = customCursor.object3D.position;
-  const camera = document.querySelector("[camera]").object3D;
-  const raycaster = new THREE.Raycaster();
-  raycaster.setFromCamera(new THREE.Vector2(cursorPosition.x, cursorPosition.y), camera);
-
-  const intersects = raycaster.intersectObjects(buttonContainer.object3D.children, true);
-
-  if (intersects.length > 0) {
-    const intersectedEl = intersects[0].object.el;
-    if (intersectedEl.classList.contains('menu-button')) {
-      const dish = intersectedEl.querySelector('a-text').getAttribute('value');
-      const desc = intersectedEl.getAttribute('data-info');
-      detailText.setAttribute('value', dish + "\n" + desc);
-      menuPanel.setAttribute('visible', false);
-      detailPanel.setAttribute('visible', true);
-    }
-  }
-});
-
-// Funzione per aggiornare la posizione del cursore personalizzato
-function updateCursorPosition(touch) {
-  const x = (touch.clientX / window.innerWidth) * 2 - 1;
-  const y = -(touch.clientY / window.innerHeight) * 2 + 1;
-  customCursor.object3D.position.set(x, y, -1);
-}
-
-// Gestione long-press per trascinare il pannello
-menuPanel.addEventListener('touchstart', (e) => {
-  startPressTimer = setTimeout(() => {
-    longPressActive = true;
-  }, 500); // Attiva il trascinamento dopo 500ms
-  prevPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-});
-
-menuPanel.addEventListener('touchend', () => {
-  clearTimeout(startPressTimer);
-  longPressActive = false;
-});
-
-// Movimento pannello o scroll
-window.addEventListener('touchmove', (e) => {
-  if (!isMarkerFound) return;
-
-  let deltaX = (e.touches[0].clientX - prevPosition.x) / 200;
-  let deltaY = (e.touches[0].clientY - prevPosition.y) / 200;
-
-  if (longPressActive) {
-    // Trascina il pannello
-    let pos = menuPanel.object3D.position;
-    menuPanel.object3D.position.set(pos.x + deltaX, pos.y - deltaY, pos.z);
-  } else {
-    // Scroll verticale del menu
-    let pos = buttonContainer.object3D.position;
-    let newY = pos.y - deltaY;
-    newY = Math.min(Math.max(newY, -0.5), 0.5); // Limita lo scroll
-    buttonContainer.object3D.position.set(pos.x, newY, pos.z);
-  }
-
-  prevPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-}, { passive: false });
-
-// Chiudi panel dettaglio e torna al menu
-closeBtn.addEventListener('click', () => {
-  detailPanel.setAttribute('visible', false);
-  menuPanel.setAttribute('visible', true);
-});
-</script>
+    // Chiudi panel dettaglio e torna al menu
+    closeBtn.addEventListener('click', () => {
+      detailPanel.setAttribute('visible', false);
+      menuPanel.setAttribute('visible', true);
+    });
+  </script>
 </body>
 </html>
