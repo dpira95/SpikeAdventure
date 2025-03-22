@@ -86,8 +86,14 @@
       </a-plane>
     </a-plane>
 
+    <!-- Camera con cursore invisibile -->
     <a-entity camera look-controls>
-      <a-cursor rayOrigin="mouse"></a-cursor>
+      <a-cursor id="cursor"
+                rayOrigin="mouse"
+                fuse="false"
+                material="opacity: 0;"
+                position="0 0 -1">
+      </a-cursor>
     </a-entity>
   </a-scene>
 
@@ -100,6 +106,7 @@ const detailText = document.querySelector("#detailText");
 const closeBtn = document.querySelector("#closeBtn");
 const buttonContainer = document.querySelector("#buttonContainer");
 const buttons = document.querySelectorAll('.menu-button');
+const cursor = document.querySelector("#cursor");
 
 // Variabili per gestire scroll e trascinamento
 let isMarkerFound = false, isDraggingPanel = false;
@@ -115,6 +122,40 @@ marker.addEventListener("markerFound", () => {
 
 marker.addEventListener("markerLost", () => {
   info.innerText = "Marker perso, puoi interagire col menu.";
+});
+
+// Creazione di un raycaster personalizzato
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+// Aggiorna la posizione del raycaster in base al touch
+window.addEventListener('touchstart', e => {
+  const touch = e.touches[0];
+  mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+});
+
+window.addEventListener('touchmove', e => {
+  const touch = e.touches[0];
+  mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+});
+
+// Simula la selezione al rilascio del tocco
+window.addEventListener('touchend', () => {
+  raycaster.setFromCamera(mouse, document.querySelector("[camera]").object3D);
+  const intersects = raycaster.intersectObjects(buttonContainer.object3D.children, true);
+
+  if (intersects.length > 0) {
+    const intersectedEl = intersects[0].object.el;
+    if (intersectedEl.classList.contains('menu-button')) {
+      const dish = intersectedEl.querySelector('a-text').getAttribute('value');
+      const desc = intersectedEl.getAttribute('data-info');
+      detailText.setAttribute('value', dish + "\n" + desc);
+      menuPanel.setAttribute('visible', false);
+      detailPanel.setAttribute('visible', true);
+    }
+  }
 });
 
 // Gestione long-press per trascinare il pannello
@@ -151,17 +192,6 @@ window.addEventListener('touchmove', (e) => {
 
   prevPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
 }, { passive: false });
-
-// Click sui pulsanti del menu
-buttons.forEach(btn => {
-  btn.addEventListener('click', evt => {
-    const dish = btn.querySelector('a-text').getAttribute('value');
-    const desc = btn.getAttribute('data-info');
-    detailText.setAttribute('value', dish + "\n" + desc);
-    menuPanel.setAttribute('visible', false);
-    detailPanel.setAttribute('visible', true);
-  });
-});
 
 // Chiudi panel dettaglio e torna al menu
 closeBtn.addEventListener('click', () => {
