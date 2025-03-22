@@ -30,7 +30,7 @@
 
     <!-- MENU PRINCIPALE -->
     <a-plane id="menuPanel"
-      position="0 0 -3"
+      position="0 0 -2"
       rotation="-45 0 0"
       width="1" height="1.5"
       color="#222"
@@ -86,7 +86,15 @@
       </a-plane>
     </a-plane>
 
-    <!-- Camera con cursore invisibile -->
+    <!-- Cursore personalizzato -->
+    <a-entity id="customCursor"
+              geometry="primitive: circle; radius: 0.02"
+              material="color: yellow; shader: flat"
+              position="0 0 -1"
+              visible="false">
+    </a-entity>
+
+    <!-- Camera -->
     <a-entity camera look-controls>
       <a-cursor id="cursor"
                 rayOrigin="mouse"
@@ -106,7 +114,7 @@ const detailText = document.querySelector("#detailText");
 const closeBtn = document.querySelector("#closeBtn");
 const buttonContainer = document.querySelector("#buttonContainer");
 const buttons = document.querySelectorAll('.menu-button');
-const cursor = document.querySelector("#cursor");
+const customCursor = document.querySelector("#customCursor");
 
 // Variabili per gestire scroll e trascinamento
 let isMarkerFound = false, isDraggingPanel = false;
@@ -118,32 +126,32 @@ marker.addEventListener("markerFound", () => {
   isMarkerFound = true;
   info.innerText = "Marker trovato!";
   menuPanel.setAttribute("visible", "true");
+  customCursor.setAttribute("visible", "true");
 });
 
 marker.addEventListener("markerLost", () => {
   info.innerText = "Marker perso, puoi interagire col menu.";
+  customCursor.setAttribute("visible", "false");
 });
 
-// Creazione di un raycaster personalizzato
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-
-// Aggiorna la posizione del raycaster in base al touch
+// Aggiorna la posizione del cursore personalizzato in base al touch
 window.addEventListener('touchstart', e => {
   const touch = e.touches[0];
-  mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+  updateCursorPosition(touch);
 });
 
 window.addEventListener('touchmove', e => {
   const touch = e.touches[0];
-  mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+  updateCursorPosition(touch);
 });
 
 // Simula la selezione al rilascio del tocco
 window.addEventListener('touchend', () => {
-  raycaster.setFromCamera(mouse, document.querySelector("[camera]").object3D);
+  const cursorPosition = customCursor.object3D.position;
+  const camera = document.querySelector("[camera]").object3D;
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(new THREE.Vector2(cursorPosition.x, cursorPosition.y), camera);
+
   const intersects = raycaster.intersectObjects(buttonContainer.object3D.children, true);
 
   if (intersects.length > 0) {
@@ -157,6 +165,13 @@ window.addEventListener('touchend', () => {
     }
   }
 });
+
+// Funzione per aggiornare la posizione del cursore personalizzato
+function updateCursorPosition(touch) {
+  const x = (touch.clientX / window.innerWidth) * 2 - 1;
+  const y = -(touch.clientY / window.innerHeight) * 2 + 1;
+  customCursor.object3D.position.set(x, y, -1);
+}
 
 // Gestione long-press per trascinare il pannello
 menuPanel.addEventListener('touchstart', (e) => {
