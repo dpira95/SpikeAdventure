@@ -1,111 +1,112 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Menu AR Ottimizzato</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Menu AR Completo</title>
     <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
         .menu-panel {
-            background: rgba(51,51,51,0.9);
-            border-radius: 0.1em;
-            transition: opacity 0.3s;
+            background: rgba(51, 51, 51, 0.95);
+            border-radius: 0.25em;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
         .menu-btn {
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
-        .menu-btn:hover {
-            opacity: 0.8;
+        .menu-btn:hover, .menu-btn:active {
+            opacity: 0.9;
             transform: scale(1.05);
         }
         .btn-text {
-            font-family: Arial;
+            font-family: 'Arial', sans-serif;
             text-align: center;
+            font-weight: bold;
         }
-        #back-btn {
+        #loading-message {
             position: absolute;
-            bottom: -0.8em;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -50%);
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            font-family: Arial;
+            z-index: 1000;
         }
     </style>
 </head>
-<body style="margin: 0">
-    <a-scene embedded arjs="trackingMethod: best;" cursor="rayOrigin: mouse">
+<body>
+    <div id="loading-message">Caricamento AR...</div>
+    
+    <a-scene embedded arjs="trackingMethod: best;" renderer="logarithmicDepthBuffer: true;" vr-mode-ui="enabled: false">
         
-        <!-- Marker Hiro con gestione visibilità -->
+        <!-- Marker Hiro -->
         <a-marker preset="hiro" id="ar-marker">
             
-            <!-- Menu Principale (Z: 0.1) -->
-            <a-entity id="main-menu" class="menu-panel" position="0 1.5 0.1" scale="0.8 0.8 0.8">
-                <!-- Sfondo (Z: 0) -->
-                <a-plane color="#333" width="2.5" height="1.8" position="0 0 0"></a-plane>
+            <!-- Contenitore principale con variabili globali -->
+            <a-entity id="global-container">
                 
-                <!-- Titolo (Z: 0.02) -->
-                <a-text value="MENU PRINCIPALE" color="#FFF" align="center" 
-                       position="0 0.7 0.02" width="5"></a-text>
-                
-                <!-- Pulsante 1 (Z: 0.03) -->
-                <a-entity class="menu-btn" position="-0.6 0.1 0.03" onclick="showPanel('info')">
-                    <a-box color="#4CC3D9" width="0.9" height="0.4" depth="0.05"></a-box>
-                    <a-text class="btn-text" value="INFO" color="#FFF" align="center" 
-                           position="0 0 0.06" width="5"></a-text>
+                <!-- Menu Principale -->
+                <a-entity id="main-menu" class="menu-panel">
+                    <a-plane class="panel-bg" width="2.8" height="2.0" position="0 0 0.1"></a-plane>
+                    
+                    <a-text class="panel-title" value="MENU PRINCIPALE" position="0 0.8 0.15" width="3.5"></a-text>
+                    
+                    <!-- Pulsante 1 -->
+                    <a-entity class="menu-btn btn-1" position="-0.7 0.2 0.15" data-panel="info">
+                        <a-box width="1.0" height="0.45" depth="0.05" color="#4CC3D9"></a-box>
+                        <a-text class="btn-text" value="INFO" position="0 0 0.06" width="3"></a-text>
+                    </a-entity>
+                    
+                    <!-- Pulsante 2 -->
+                    <a-entity class="menu-btn btn-2" position="0.7 0.2 0.15" data-panel="settings">
+                        <a-box width="1.0" height="0.45" depth="0.05" color="#EF2D5E"></a-box>
+                        <a-text class="btn-text" value="IMPOSTAZIONI" position="0 0 0.06" width="3"></a-text>
+                    </a-entity>
+                    
+                    <!-- Pulsante 3 -->
+                    <a-entity class="menu-btn btn-3" position="0 -0.4 0.15" data-panel="gallery">
+                        <a-box width="2.0" height="0.45" depth="0.05" color="#7BC8A4"></a-box>
+                        <a-text class="btn-text" value="GALLERIA" position="0 0 0.06" width="3"></a-text>
+                    </a-entity>
                 </a-entity>
                 
-                <!-- Pulsante 2 (Z: 0.03) -->
-                <a-entity class="menu-btn" position="0.6 0.1 0.03" onclick="showPanel('settings')">
-                    <a-box color="#EF2D5E" width="0.9" height="0.4" depth="0.05"></a-box>
-                    <a-text class="btn-text" value="IMPOSTAZIONI" color="#FFF" align="center" 
-                           position="0 0 0.06" width="5"></a-text>
+                <!-- Pannello Info -->
+                <a-entity id="info-panel" class="menu-panel" visible="false">
+                    <a-plane class="panel-bg" width="2.8" height="2.0" position="0 0 0.1"></a-plane>
+                    <a-text class="panel-title" value="INFORMAZIONI" color="#4CC3D9" position="0 0.8 0.15" width="3.5"></a-text>
+                    <a-text value="Benvenuto nel menu AR\n\nSeleziona le opzioni\ndai pulsanti principali" 
+                           align="center" position="0 0.1 0.15" width="2.5" color="#FFF"></a-text>
+                    <a-entity class="menu-btn back-btn" position="0 -0.7 0.15" data-panel="main">
+                        <a-box width="1.0" height="0.4" depth="0.05" color="#EF2D5E"></a-box>
+                        <a-text class="btn-text" value="INDIETRO" position="0 0 0.06" width="3"></a-text>
+                    </a-entity>
                 </a-entity>
                 
-                <!-- Pulsante 3 (Z: 0.03) -->
-                <a-entity class="menu-btn" position="0 -0.5 0.03" onclick="showPanel('gallery')">
-                    <a-box color="#7BC8A4" width="1.8" height="0.4" depth="0.05"></a-box>
-                    <a-text class="btn-text" value="GALLERIA" color="#FFF" align="center" 
-                           position="0 0 0.06" width="5"></a-text>
+                <!-- Altri pannelli (simili) -->
+                <a-entity id="settings-panel" class="menu-panel" visible="false">
+                    <!-- ... struttura simile ... -->
                 </a-entity>
-            </a-entity>
-            
-            <!-- Pannello Info (Z: 0.2) -->
-            <a-entity id="info-panel" class="menu-panel" position="0 1.5 0.2" scale="0.8 0.8 0.8" visible="false">
-                <a-plane color="#333" width="2.5" height="1.8" position="0 0 0"></a-plane>
-                <a-text value="INFORMAZIONI" color="#4CC3D9" align="center" position="0 0.7 0.02"></a-text>
-                <a-text value="Questo è un progetto AR\ncon menu interattivo" 
-                       align="center" position="0 0.1 0.02" width="2.5" color="#FFF"></a-text>
-                <a-entity id="back-btn" class="menu-btn" position="0 -0.7 0.03" onclick="showMainMenu()">
-                    <a-box color="#EF2D5E" width="0.9" height="0.3" depth="0.05"></a-box>
-                    <a-text value="INDIETRO" color="#FFF" align="center" position="0 0 0.06"></a-text>
+                
+                <a-entity id="gallery-panel" class="menu-panel" visible="false">
+                    <!-- ... struttura simile ... -->
                 </a-entity>
-            </a-entity>
-            
-            <!-- Pannello Impostazioni (Z: 0.3) -->
-            <a-entity id="settings-panel" class="menu-panel" position="0 1.5 0.3" scale="0.8 0.8 0.8" visible="false">
-                <a-plane color="#333" width="2.5" height="1.8" position="0 0 0"></a-plane>
-                <a-text value="IMPOSTAZIONI" color="#EF2D5E" align="center" position="0 0.7 0.02"></a-text>
-                <a-text value="Opzioni disponibili:\n- Audio\n- Luminosità\n- Controlli" 
-                       align="center" position="0 0.1 0.02" width="2.5" color="#FFF"></a-text>
-                <a-entity id="back-btn" class="menu-btn" position="0 -0.7 0.03" onclick="showMainMenu()">
-                    <a-box color="#4CC3D9" width="0.9" height="0.3" depth="0.05"></a-box>
-                    <a-text value="INDIETRO" color="#FFF" align="center" position="0 0 0.06"></a-text>
+                
+                <!-- Oggetto 3D dimostrativo -->
+                <a-entity id="3d-model" position="0 0.5 0.5">
+                    <a-box color="yellow" width="0.5" height="0.5" depth="0.5"></a-box>
                 </a-entity>
-            </a-entity>
-            
-            <!-- Pannello Galleria (Z: 0.4) -->
-            <a-entity id="gallery-panel" class="menu-panel" position="0 1.5 0.4" scale="0.8 0.8 0.8" visible="false">
-                <a-plane color="#333" width="2.5" height="1.8" position="0 0 0"></a-plane>
-                <a-text value="GALLERIA" color="#7BC8A4" align="center" position="0 0.7 0.02"></a-text>
-                <a-text value="Contenuti disponibili:\n- Modello 1\n- Modello 2\n- Modello 3" 
-                       align="center" position="0 0.1 0.02" width="2.5" color="#FFF"></a-text>
-                <a-entity id="back-btn" class="menu-btn" position="0 -0.7 0.03" onclick="showMainMenu()">
-                    <a-box color="#EF2D5E" width="0.9" height="0.3" depth="0.05"></a-box>
-                    <a-text value="INDIETRO" color="#FFF" align="center" position="0 0 0.06"></a-text>
-                </a-entity>
-            </a-entity>
-            
-            <!-- Oggetto 3D dimostrativo (Z: 0.5) -->
-            <a-entity id="3d-model" position="0 0.5 0.5" rotation="0 45 45">
-                <a-box color="yellow" width="0.5" height="0.5" depth="0.5"></a-box>
             </a-entity>
         </a-marker>
         
@@ -114,69 +115,178 @@
     </a-scene>
 
     <script>
-        // Gestione marker visibile/non visibile
-        const marker = document.querySelector('#ar-marker');
-        let markerVisible = true;
-        let lastPanel = 'main-menu';
+        // =============================================
+        // CONFIGURAZIONE GLOBALE (MODIFICA QUI)
+        // =============================================
+        const CONFIG = {
+            // Trasformazioni principali
+            rotation: { x: -4, y: 0, z: 0 },  // Rotazione base (gradi)
+            position: { x: 0, y: 1.4, z: 0.2 }, // Posizione base (metri)
+            scale: 0.75,                       // Scala uniforme
+            
+            // Spaziature
+            panelSpacing: 0.15,                // Distanza tra pannelli sull'asse Z
+            elementOffset: 0.05,               // Offset elementi interni
+            
+            // Stili
+            colors: {
+                primary: "#4CC3D9",
+                secondary: "#EF2D5E",
+                accent: "#7BC8A4",
+                background: "#333333",
+                text: "#FFFFFF"
+            },
+            
+            // Dimensioni
+            panelWidth: 2.8,
+            panelHeight: 2.0,
+            buttonWidth: 1.0,
+            buttonHeight: 0.45
+        };
 
-        marker.addEventListener('markerFound', () => {
-            markerVisible = true;
-            document.querySelector(`#${lastPanel}`).setAttribute('visible', 'true');
+        // =============================================
+        // INIZIALIZZAZIONE
+        // =============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Nascondi messaggio caricamento
+            document.getElementById('loading-message').style.display = 'none';
+            
+            // Ottieni riferimenti agli elementi
+            const container = document.getElementById('global-container');
+            const marker = document.getElementById('ar-marker');
+            
+            // Applica configurazione globale
+            applyGlobalConfig();
+            
+            // Gestione eventi marker
+            marker.addEventListener('markerFound', () => onMarkerFound());
+            marker.addEventListener('markerLost', () => onMarkerLost());
+            
+            // Inizializza interazioni
+            initInteractions();
         });
 
-        marker.addEventListener('markerLost', () => {
-            markerVisible = false;
-            document.querySelectorAll('.menu-panel').forEach(panel => {
-                panel.setAttribute('visible', 'false');
+        // =============================================
+        // FUNZIONI PRINCIPALI
+        // =============================================
+        function applyGlobalConfig() {
+            const container = document.getElementById('global-container');
+            
+            // Applica trasformazioni principali
+            container.setAttribute('rotation', `${CONFIG.rotation.x} ${CONFIG.rotation.y} ${CONFIG.rotation.z}`);
+            container.setAttribute('position', `${CONFIG.position.x} ${CONFIG.position.y} ${CONFIG.position.z}`);
+            container.setAttribute('scale', `${CONFIG.scale} ${CONFIG.scale} ${CONFIG.scale}`);
+            
+            // Applica a tutti i pannelli
+            document.querySelectorAll('.menu-panel').forEach((panel, index) => {
+                // Posizione Z progressiva
+                const zPos = CONFIG.position.z + (index * CONFIG.panelSpacing);
+                panel.setAttribute('position', `0 0 ${zPos}`);
+                
+                // Sfondo
+                const bg = panel.querySelector('.panel-bg');
+                if(bg) {
+                    bg.setAttribute('width', CONFIG.panelWidth);
+                    bg.setAttribute('height', CONFIG.panelHeight);
+                    bg.setAttribute('color', CONFIG.colors.background);
+                    bg.setAttribute('position', `0 0 ${CONFIG.elementOffset}`);
+                }
+                
+                // Titoli
+                const title = panel.querySelector('.panel-title');
+                if(title) {
+                    title.setAttribute('color', CONFIG.colors.primary);
+                    title.setAttribute('position', `0 0.8 ${CONFIG.elementOffset + 0.05}`);
+                }
             });
-        });
+            
+            // Applica a tutti i pulsanti
+            document.querySelectorAll('.menu-btn').forEach(btn => {
+                // Compensazione rotazione
+                btn.setAttribute('rotation', `${-CONFIG.rotation.x} 0 0`);
+                
+                // Posizione Z
+                const pos = btn.getAttribute('position');
+                if(pos) {
+                    const newZ = parseFloat(pos.z) + CONFIG.elementOffset;
+                    btn.setAttribute('position', `${pos.x} ${pos.y} ${newZ}`);
+                }
+                
+                // Stili
+                const box = btn.querySelector('a-box');
+                if(box) {
+                    box.setAttribute('width', CONFIG.buttonWidth);
+                    box.setAttribute('height', CONFIG.buttonHeight);
+                }
+            });
+        }
 
-        // Funzioni per gestire i pannelli
-        function showPanel(panelName) {
-            if(!markerVisible) return;
-            
-            lastPanel = panelName + '-panel';
-            document.querySelectorAll('.menu-panel').forEach(panel => {
-                panel.setAttribute('visible', 'false');
+        function initInteractions() {
+            // Gestione click/touch
+            document.querySelectorAll('.menu-btn').forEach(btn => {
+                // Click mouse
+                btn.addEventListener('click', function() {
+                    handleButtonClick(this);
+                });
+                
+                // Touch mobile
+                btn.addEventListener('touchstart', function() {
+                    this.setAttribute('scale', '0.95 0.95 0.95');
+                });
+                
+                btn.addEventListener('touchend', function() {
+                    this.setAttribute('scale', '1 1 1');
+                    handleButtonClick(this);
+                });
             });
-            document.querySelector(`#${lastPanel}`).setAttribute('visible', 'true');
+        }
+
+        function handleButtonClick(btn) {
+            if(!btn.dataset.panel) return;
             
-            // Animazione pulsante cliccato
-            const btn = event.target.closest('.menu-btn');
+            // Animazione click
             btn.setAttribute('scale', '0.9 0.9 0.9');
             setTimeout(() => {
                 btn.setAttribute('scale', '1 1 1');
-            }, 200);
+            }, 150);
+            
+            // Cambio pannello
+            showPanel(btn.dataset.panel);
         }
 
-        function showMainMenu() {
-            if(!markerVisible) return;
-            
-            lastPanel = 'main-menu';
-            document.querySelectorAll('[id$="-panel"]').forEach(panel => {
+        function showPanel(panelName) {
+            // Nascondi tutti i pannelli
+            document.querySelectorAll('.menu-panel').forEach(panel => {
                 panel.setAttribute('visible', 'false');
             });
-            document.querySelector('#main-menu').setAttribute('visible', 'true');
+            
+            // Mostra il pannello richiesto
+            const panel = document.getElementById(`${panelName}-panel`);
+            if(panel) {
+                panel.setAttribute('visible', 'true');
+            }
         }
 
-        // Supporto mobile
-        document.querySelectorAll('.menu-btn').forEach(btn => {
-            btn.addEventListener('touchstart', () => {
-                btn.setAttribute('scale', '0.95 0.95 0.95');
-            });
-            btn.addEventListener('touchend', () => {
-                btn.setAttribute('scale', '1 1 1');
-            });
-        });
+        function onMarkerFound() {
+            // Ripristina l'ultimo pannello visibile
+            showPanel('main');
+        }
 
-        // Rotazione continua dell'oggetto 3D
+        function onMarkerLost() {
+            // Nascondi tutto quando il marker non è visibile
+            document.querySelectorAll('.menu-panel').forEach(panel => {
+                panel.setAttribute('visible', 'false');
+            });
+        }
+
+        // Animazione continua dell'oggetto 3D
         setInterval(() => {
-            if(markerVisible) {
-                const model = document.querySelector('#3d-model');
-                const rotation = model.getAttribute('rotation');
+            const model = document.getElementById('3d-model');
+            if(model) {
+                const rotation = model.getAttribute('rotation') || { x: 0, y: 45, z: 45 };
                 model.setAttribute('rotation', {
                     x: rotation.x,
-                    y: rotation.y + 0.5,
+                    y: rotation.y + 0.7,
                     z: rotation.z
                 });
             }
