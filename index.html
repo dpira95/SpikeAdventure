@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Pulsante AR Persistente</title>
+    <title>Pulsante AR Full Interactivity</title>
     <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
@@ -22,101 +22,134 @@
 <body>
     <div id="status">Inquadra il marker Hiro</div>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    <a-scene 
+        embedded 
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        renderer="logarithmicDepthBuffer: true;"
+    >
         <!-- Marker Hiro -->
-        <a-marker preset="hiro" id="marker" emitevents="true"></a-marker>
-        
-        <!-- Pulsante 3D (aggiunto dinamicamente) -->
-        <a-entity id="button-container"></a-entity>
+        <a-marker preset="hiro" id="marker" emitevents="true">
+            <!-- Area interattiva invisibile (genera il collider) -->
+            <a-entity id="button-hitbox"
+                class="clickable"
+                geometry="primitive: box; width: 1.2; height: 0.5; depth: 0.2"
+                material="visible: false"
+                position="0 1.5 0"
+                event-set__mouseenter="scale: 1.1 1.1 1.1"
+                event-set__mouseleave="scale: 1 1 1"
+                event-set__mousedown="scale: 0.9 0.9 0.9"
+                event-set__mouseup="scale: 1 1 1">
+            </a-entity>
 
-        <!-- Camera con raycaster ottimizzato per mobile/desktop -->
+            <!-- Pulsante visibile (estetico) -->
+            <a-box id="button-visual"
+                position="0 1.5 0"
+                width="1"
+                height="0.3"
+                depth="0.1"
+                color="#4CC3D9">
+                <a-text value="CLICCAMI" 
+                    align="center" 
+                    position="0 0 0.1" 
+                    color="white"></a-text>
+            </a-box>
+
+            <!-- Feedback visivo -->
+            <a-box id="red-rect"
+                position="0 1 0"
+                width="1.5"
+                height="0.5"
+                depth="0.1"
+                color="red"
+                visible="false"></a-box>
+        </a-marker>
+
+        <!-- Camera con raycaster ottimizzato -->
         <a-entity camera>
-            <a-entity cursor="rayOrigin: mouse"
-                     raycaster="far: 100; objects: .clickable"></a-entity>
+            <a-entity cursor="rayOrigin: mouse; fuse: false"
+                     raycaster="far: 100; interval: 10; objects: .clickable"></a-entity>
         </a-entity>
     </a-scene>
 
     <script>
-        // VARIABILI GLOBALI
-        let buttonCreated = false;
+        // 1. INIZIALIZZAZIONE
         const statusDiv = document.getElementById('status');
-        const container = document.getElementById('button-container');
-        const scene = document.querySelector('a-scene');
+        const hitbox = document.getElementById('button-hitbox');
+        const visual = document.getElementById('button-visual');
+        const redRect = document.getElementById('red-rect');
+        let buttonActive = false;
 
-        // CREAZIONE PULSANTE
-        function createButton() {
-            if(buttonCreated) return;
-            
-            container.innerHTML = `
-                <a-box id="my-button" 
-                      position="0 0 0" 
-                      width="1" 
-                      height="0.3" 
-                      depth="0.1"
-                      color="#4CC3D9"
-                      class="clickable"
-                      event-set__enter="scale: 1.2 1.2 1.2"
-                      event-set__leave="scale: 1 1 1">
-                    <a-text value="CLICCAMI" 
-                           align="center" 
-                           position="0 0 0.1" 
-                           color="white"></a-text>
-                </a-box>
-                
-                <a-box id="red-rect"
-                      position="0 -0.5 0"
-                      width="1.5"
-                      height="0.5"
-                      depth="0.1"
-                      color="red"
-                      visible="false"></a-box>
-            `;
-            
-            buttonCreated = true;
-            statusDiv.textContent = "Pulsante creato - Toccalo!";
-            
-            // Aggiungi event listeners manualmente
-            const button = document.getElementById('my-button');
-            const rect = document.getElementById('red-rect');
-            
-            // Gestione click desktop
-            button.addEventListener('click', () => {
-                rect.setAttribute('visible', !rect.getAttribute('visible'));
+        // 2. OTTIMIZZAZIONE RAYCASTER
+        function refreshRaycaster() {
+            const scene = document.querySelector('a-scene');
+            if(scene && scene.components.raycaster) {
+                scene.components.raycaster.refreshObjects();
+                console.log("Raycaster aggiornato");
+            }
+        }
+
+        // 3. GESTIONE INTERAZIONI
+        function setupInteractions() {
+            // Desktop
+            hitbox.addEventListener('click', () => {
+                if(!buttonActive) return;
+                toggleRedRect();
             });
-            
-            // Gestione touch mobile
-            button.addEventListener('touchstart', (e) => {
+
+            // Mobile
+            hitbox.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                button.setAttribute('scale', '1.2 1.2 1.2');
+                if(!buttonActive) return;
+                hitbox.setAttribute('scale', '0.9 0.9 0.9');
             });
-            
-            button.addEventListener('touchend', (e) => {
+
+            hitbox.addEventListener('touchend', (e) => {
                 e.preventDefault();
-                button.setAttribute('scale', '1 1 1');
-                rect.setAttribute('visible', !rect.getAttribute('visible'));
-                statusDiv.textContent = "Toccato! Rettangolo " + 
-                    (rect.getAttribute('visible') ? "visibile" : "nascosto");
+                hitbox.setAttribute('scale', '1 1 1');
+                if(buttonActive) toggleRedRect();
             });
         }
 
-        // GESTIONE MARKER
-        document.getElementById('marker').addEventListener('markerFound', (e) => {
-            if(!buttonCreated) {
-                // Posiziona il container dove è stato trovato il marker
-                const markerPos = e.target.object3D.position;
-                container.setAttribute('position', markerPos);
-                container.setAttribute('visible', 'true');
-                
-                createButton();
-            }
+        // 4. TOGGLE FEEDBACK VISIVO
+        function toggleRedRect() {
+            const visible = redRect.getAttribute('visible');
+            redRect.setAttribute('visible', !visible);
+            statusDiv.textContent = !visible ? 
+                "Pulsante attivato!" : "Pronto per un nuovo click";
+        }
+
+        // 5. GESTIONE MARKER
+        document.getElementById('marker').addEventListener('markerFound', () => {
+            buttonActive = true;
+            statusDiv.textContent = "Pulsante pronto - Interagisci!";
+            
+            // Sincronizza posizione hitbox e visual
+            const markerPos = document.getElementById('marker').object3D.position;
+            hitbox.setAttribute('position', markerPos);
+            visual.setAttribute('position', markerPos);
+            redRect.setAttribute('position', {
+                x: markerPos.x,
+                y: markerPos.y - 0.5,
+                z: markerPos.z
+            });
         });
 
-        // FORZA AGGIORNAMENTO RAYCASTER (fix per mobile)
-        setTimeout(() => {
-            if(scene.components.raycaster) {
-                scene.components.raycaster.refreshObjects();
-            }
-        }, 2000);
+        document.getElementById('marker').addEventListener('markerLost', () => {
+            buttonActive = false;
+        });
+
+        // 6. AVVIO
+        window.addEventListener('load', () => {
+            setupInteractions();
+            
+            // Fix per mobile
+            setTimeout(refreshRaycaster, 1500);
+            setInterval(refreshRaycaster, 3000);
+            
+            // Debug
+            console.log("Sistema pronto");
+            statusDiv.textContent += " - Attendere inizializzazione...";
+        });
     </script>
 </body>
 </html>
