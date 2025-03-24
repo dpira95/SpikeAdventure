@@ -1,172 +1,156 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AR.js - Menu Completo con UI Sovrapposta</title>
-  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
-
-  <style>
-    /* Stile per l'UI sovrapposta */
-    #ui {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none; /* Permette di interagire con la scena 3D */
-      z-index: 10;
-    }
-    #ui button {
-      pointer-events: auto; /* Abilita l'interazione con i pulsanti */
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 20px;
-      background-color: rgba(0, 0, 0, 0.8);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    .message {
-      position: fixed;
-      bottom: 60px; /* Spostato più in alto per fare spazio al pulsante */
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 18px;
-      background-color: rgba(0,0,0,0.6);
-      color: white;
-      font-family: Arial, sans-serif;
-      border-radius: 10px;
-      z-index: 9999;
-      user-select: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>AR Marker Detection</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/three.js/build/ar-threex.js"></script>
+    <style>
+        body { 
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial;
+        }
+        #status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+        #marker-detected {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,255,0,0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 1.5em;
+            display: none;
+            z-index: 100;
+        }
+    </style>
 </head>
+<body>
+    <div id="status">Stato: In attesa della webcam...</div>
+    <div id="marker-detected">Marker Hiro Rilevato!</div>
 
-<body style="margin: 0; overflow: hidden;">
-  <!-- Scena A-Frame -->
-  <a-scene embedded arjs>
-    <a-marker preset="hiro" id="hiroMarker"></a-marker>
+    <script>
+        // Elementi UI
+        const statusDiv = document.getElementById('status');
+        const markerDetectedDiv = document.getElementById('marker-detected');
 
-    <!-- MENU PRINCIPALE -->
-    <a-plane id="menuPanel"
-      position="0 0 -2"
-      rotation="-45 0 0"
-      width="1" height="1.5"
-      color="#222"
-      opacity="0.8"
-      visible="false">
+        // 1. Setup Three.js
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-      <a-text value="Menu" color="#FFFFFF"
-              position="0 0.65 0.01" align="center" width="1.2"></a-text>
+        // 2. Configurazione AR.js
+        const arToolkitSource = new THREEx.ArToolkitSource({
+            sourceType: 'webcam',
+            sourceWidth: 1280,
+            sourceHeight: 720,
+            displayWidth: window.innerWidth,
+            displayHeight: window.innerHeight
+        });
 
-      <!-- Scroll Container con pulsanti piatti -->
-      <a-entity id="buttonContainer" position="0 0 0.01">
-        <!-- Pulsanti -->
-        <a-plane class="menu-button" data-info="Piatto 1:Ingredienti freschi" color="#FF4444" width="0.9" height="0.2" position="0 0.5 0.01">
-          <a-text value="Pizza Margherita" align="left" width="0.8" color="#FFF" position="-0.4 0 0.02"></a-text>
-          <a-text value="6,50 €" align="right" width="0.8" color="#FFF" position="0.4 0 0.02"></a-text>
-        </a-plane>
+        const arToolkitContext = new THREEx.ArToolkitContext({
+            cameraParametersUrl: 'https://raw.githubusercontent.com/AR-js-org/AR.js/master/three.js/data/camera_para.dat',
+            detectionMode: 'mono_and_matrix',
+            matrixCodeType: '3x3',
+            maxDetectionRate: 60
+        });
 
-        <a-plane class="menu-button" data-info="Piatto 2:Saporito e gustoso" color="#44AAFF" width="0.9" height="0.2" position="0 0.2 0.01">
-          <a-text value="Lasagna" align="left" width="0.8" color="#FFF" position="-0.4 0 0.02"></a-text>
-          <a-text value="8,00 €" align="right" width="0.8" color="#FFF" position="0.4 0 0.02"></a-text>
-        </a-plane>
+        // 3. Marker Hiro
+        const markerRoot = new THREE.Group();
+        scene.add(markerRoot);
+        
+        // Variabile per tracciare lo stato del marker
+        let isMarkerDetected = false;
+        let detectionTimeout;
 
-        <a-plane class="menu-button" data-info="Piatto 3:Con ingredienti bio" color="#44FF88" width="0.9" height="0.2" position="0 -0.1 0.01">
-          <a-text value="Insalata Greca" align="left" width="0.8" color="#FFF" position="-0.4 0 0.02"></a-text>
-          <a-text value="7,00 €" align="right" width="0.8" color="#FFF" position="0.4 0 0.02"></a-text>
-        </a-plane>
+        // 4. Avvio applicazione
+        arToolkitSource.init(() => {
+            statusDiv.textContent = "Webcam attiva - Cerca il marker Hiro";
+            
+            arToolkitContext.init(() => {
+                camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+                
+                // Controllo marker
+                const markerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+                    type: 'pattern',
+                    patternUrl: 'https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/patt.hiro',
+                    changeMatrixMode: 'cameraTransformMatrix'
+                });
 
-        <a-plane class="menu-button" data-info="Piatto 4:Tradizione romana" color="#FFAA44" width="0.9" height="0.2" position="0 -0.4 0.01">
-          <a-text value="Carbonara" align="left" width="0.8" color="#FFF" position="-0.4 0 0.02"></a-text>
-          <a-text value="9,50 €" align="right" width="0.8" color="#FFF" position="0.4 0 0.02"></a-text>
-        </a-plane>
+                // Oggetto 3D da visualizzare
+                const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+                const material = new THREE.MeshNormalMaterial();
+                const cube = new THREE.Mesh(geometry, material);
+                cube.position.y = 0.5;
+                markerRoot.add(cube);
 
-        <a-plane class="menu-button" data-info="Piatto 5:Dolce e cremoso" color="#AA44FF" width="0.9" height="0.2" position="0 -0.7 0.01">
-          <a-text value="Tiramisù" align="left" width="0.8" color="#FFF" position="-0.4 0 0.02"></a-text>
-          <a-text value="5,00 €" align="right" width="0.8" color="#FFF" position="0.4 0 0.02"></a-text>
-        </a-plane>
+                // Animazione e controllo del marker
+                function animate() {
+                    requestAnimationFrame(animate);
+                    
+                    // Controlla se il marker è visibile
+                    const markerVisible = markerRoot.visible;
+                    
+                    if (markerVisible && !isMarkerDetected) {
+                        // Marker appena rilevato
+                        isMarkerDetected = true;
+                        markerDetectedDiv.style.display = 'block';
+                        statusDiv.textContent = "Marker Hiro rilevato!";
+                        
+                        // Nascondi il messaggio dopo 3 secondi
+                        clearTimeout(detectionTimeout);
+                        detectionTimeout = setTimeout(() => {
+                            markerDetectedDiv.style.display = 'none';
+                        }, 3000);
+                    } 
+                    else if (!markerVisible && isMarkerDetected) {
+                        // Marker perso
+                        isMarkerDetected = false;
+                        statusDiv.textContent = "Marker perso - Cerca il marker Hiro";
+                    }
+                    
+                    // Animazione
+                    if (markerVisible) {
+                        cube.rotation.x += 0.01;
+                        cube.rotation.y += 0.01;
+                    }
+                    
+                    if (arToolkitSource.ready) {
+                        arToolkitContext.update(arToolkitSource.domElement);
+                    }
+                    renderer.render(scene, camera);
+                }
+                animate();
+            });
+        });
 
-        <a-plane class="menu-button" data-info="Piatto 6:Specialità chef" color="#FF4488" width="0.9" height="0.2" position="0 -1 0.01">
-          <a-text value="Filetto al pepe" align="left" width="0.8" color="#FFF" position="-0.4 0 0.02"></a-text>
-          <a-text value="12,00 €" align="right" width="0.8" color="#FFF" position="0.4 0 0.02"></a-text>
-        </a-plane>
-      </a-entity>
-    </a-plane>
+        // Gestione errori
+        arToolkitSource.init().catch(error => {
+            statusDiv.textContent = `ERRORE: ${error.message}`;
+            if (error.name === 'NotAllowedError') {
+                statusDiv.innerHTML += "<br>→ Abilita i permessi della webcam";
+            }
+        });
 
-    <!-- PANEL DETTAGLI PIATTO -->
-    <a-plane id="detailPanel" position="0 0 -1.8" rotation="-45 0 0" width="1" height="0.8" color="#333" opacity="0.9" visible="false">
-      <a-text id="detailText" value="" color="#FFF" position="0 0.15 0.01" align="center" width="0.9"></a-text>
-      <a-plane id="closeBtn" color="#990000" width="0.4" height="0.15" position="0 -0.25 0.01">
-        <a-text value="Chiudi" align="center" color="#FFF" width="0.8" position="0 0 0.02"></a-text>
-      </a-plane>
-    </a-plane>
-
-    <!-- Camera -->
-    <a-entity camera look-controls>
-      <a-cursor id="cursor"
-                rayOrigin="mouse"
-                fuse="false"
-                material="opacity: 0;"
-                position="0 0 -1">
-      </a-cursor>
-    </a-entity>
-  </a-scene>
-
-  <!-- UI sovrapposta -->
-  <div id="ui">
-    <div id="info" class="message">Inquadra il marker...</div>
-    <button id="actionButton">Apri Menu</button>
-  </div>
-
-  <script>
-    const marker = document.querySelector("#hiroMarker");
-    const info = document.getElementById("info");
-    const menuPanel = document.querySelector("#menuPanel");
-    const detailPanel = document.querySelector("#detailPanel");
-    const detailText = document.querySelector("#detailText");
-    const closeBtn = document.querySelector("#closeBtn");
-    const buttonContainer = document.querySelector("#buttonContainer");
-    const buttons = document.querySelectorAll('.menu-button');
-    const actionButton = document.getElementById('actionButton');
-
-    // Rilevamento marker
-    marker.addEventListener("markerFound", () => {
-      info.innerText = "Marker trovato!";
-      menuPanel.setAttribute("visible", "true");
-      actionButton.style.display = 'block'; // Mostra il pulsante
-    });
-
-    marker.addEventListener("markerLost", () => {
-      info.innerText = "Marker perso, puoi interagire col menu.";
-      actionButton.style.display = 'none'; // Nascondi il pulsante
-    });
-
-    // Gestione del pulsante "Apri Menu"
-    actionButton.addEventListener('click', () => {
-      menuPanel.setAttribute('visible', true);
-      detailPanel.setAttribute('visible', false);
-    });
-
-    // Click sui pulsanti del menu
-    buttons.forEach(btn => {
-      btn.addEventListener('click', evt => {
-        const dish = btn.querySelector('a-text').getAttribute('value');
-        const desc = btn.getAttribute('data-info');
-        detailText.setAttribute('value', dish + "\n" + desc);
-        menuPanel.setAttribute('visible', false);
-        detailPanel.setAttribute('visible', true);
-      });
-    });
-
-    // Chiudi panel dettaglio e torna al menu
-    closeBtn.addEventListener('click', () => {
-      detailPanel.setAttribute('visible', false);
-      menuPanel.setAttribute('visible', true);
-    });
-  </script>
+        // Adatta alle dimensioni della finestra
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
