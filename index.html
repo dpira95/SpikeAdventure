@@ -2,75 +2,91 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>AR Basic</title>
+    <title>AR Click Test</title>
     <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
-        #message {
+        #status {
             position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
+            top: 10px;
+            left: 10px;
+            background: black;
             color: white;
             padding: 10px;
             font-family: Arial;
             z-index: 1000;
-            display: none;
         }
     </style>
 </head>
 <body>
-    <div id="message">Messaggio</div>
+    <div id="status">Inquadra il marker Hiro</div>
 
-    <a-scene embedded arjs="trackingMethod: best;">
+    <a-scene 
+        embedded 
+        arjs="trackingMethod: best;"
+        cursor="rayOrigin: mouse; fuse: false;"
+        raycaster="objects: .clickable; far: 100;"
+    >
         <!-- Marker Hiro -->
         <a-marker preset="hiro" id="marker">
             <!-- Pulsante Base -->
-            <a-entity id="my-button" class="clickable"
+            <a-entity class="clickable" 
                      position="0 1.5 0"
                      geometry="primitive: box; width: 1; height: 0.3; depth: 0.05"
                      material="color: #4CC3D9"
-                     onclick="buttonClicked()">
-                <a-text value="PULSANTE" 
+                     event-set__1="_event: mouseenter; scale: 1.1 1.1 1.1"
+                     event-set__2="_event: mouseleave; scale: 1 1 1"
+                     onclick="showRedRect()">
+                <a-text value="CLICCAMI" 
                        align="center" 
                        position="0 0 0.1" 
-                       color="white" 
-                       width="5"></a-text>
+                       color="white"></a-text>
             </a-entity>
 
-            <!-- Rettangolo rosso (nascosto inizialmente) -->
-            <a-entity id="red-rect" 
+            <!-- Rettangolo rosso (nascosto) -->
+            <a-entity id="red-rect"
                      visible="false"
                      position="0 1 0"
                      geometry="primitive: box; width: 1.5; height: 0.5; depth: 0.05"
                      material="color: red"></a-entity>
         </a-marker>
-        
-        <a-entity camera></a-entity>
+
+        <!-- Camera con raycaster -->
+        <a-entity camera look-controls>
+            <a-entity cursor="fuse: false" position="0 0 -1"></a-entity>
+        </a-entity>
     </a-scene>
 
     <script>
-        // Variabile per tenere traccia dello stato
-        let isCreated = false;
+        // Variabile di stato
+        let markerDetected = false;
 
-        // Quando trova il marker
+        // Rilevamento marker
         document.querySelector('#marker').addEventListener('markerFound', () => {
-            if(!isCreated) {
-                document.getElementById('message').textContent = "Marker trovato - Clicca il pulsante";
-                document.getElementById('message').style.display = 'block';
-                isCreated = true;
-            }
+            markerDetected = true;
+            document.getElementById('status').textContent = "Marker rilevato - Clicca il pulsante";
         });
 
-        // Funzione al click del pulsante
-        function buttonClicked() {
-            const rect = document.getElementById('red-rect');
-            rect.setAttribute('visible', !rect.getAttribute('visible'));
+        // Funzione affidabile per il click
+        function showRedRect() {
+            if(!markerDetected) return;
             
-            document.getElementById('message').textContent = 
-                rect.getAttribute('visible') ? "Pulsante cliccato!" : "Clicca di nuovo";
+            const rect = document.getElementById('red-rect');
+            rect.setAttribute('visible', true);
+            document.getElementById('status').textContent = "Pulsante cliccato!";
+            
+            // Reset dopo 2 secondi
+            setTimeout(() => {
+                rect.setAttribute('visible', false);
+                document.getElementById('status').textContent = "Pronto per un nuovo click";
+            }, 2000);
+        }
+
+        // Debug iniziale
+        if(!AFRAME.components['raycaster']) {
+            console.error("Raycaster non trovato!");
+            document.getElementById('status').textContent = "ERRORE: Raycaster mancante";
         }
     </script>
 </body>
