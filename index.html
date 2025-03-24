@@ -2,121 +2,149 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Pulsante AR Persistente</title>
+    <title>Pulsante AR Funzionante</title>
     <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; }
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            touch-action: none;
+        }
         #status {
             position: absolute;
-            top: 30px;
-            left: 30px;
+            top: 20px;
+            left: 20px;
             background: rgba(0,0,0,0.7);
             color: white;
-            padding: 0px;
+            padding: 10px;
             font-family: Arial;
             z-index: 1000;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
     <div id="status">Inquadra il marker Hiro</div>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    <a-scene 
+        embedded 
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        renderer="logarithmicDepthBuffer: true; antialias: true;"
+    >
         <!-- Marker Hiro -->
         <a-marker preset="hiro" id="marker" emitevents="true"></a-marker>
         
-        <!-- Pulsante 3D (aggiunto dinamicamente) -->
-        <a-entity id="button-container"></a-entity>
+        <!-- Contenitore indipendente dal marker -->
+        <a-entity id="button-container">
+            <!-- Hitbox invisibile più grande -->
+            <a-entity id="button-hitbox"
+                geometry="primitive: box; width: 1.3; height: 0.5; depth: 0.2"
+                material="visible: false"
+                class="clickable"
+                position="0 1.5 0"
+                event-set__mouseenter="scale: 1.1 1.1 1.1"
+                event-set__mouseleave="scale: 1 1 1">
+            </a-entity>
+            
+            <!-- Pulsante visibile -->
+            <a-box id="button-visual"
+                position="0 1.5 0"
+                width="1"
+                height="0.3"
+                depth="0.1"
+                color="#4CC3D9">
+                <a-text value="CLICCAMI" 
+                    align="center" 
+                    position="0 0 0.1" 
+                    color="white"></a-text>
+            </a-box>
+            
+            <!-- Feedback visivo -->
+            <a-box id="red-rect"
+                position="0 1 0"
+                width="1.5"
+                height="0.5"
+                depth="0.1"
+                color="red"
+                visible="false"></a-box>
+        </a-entity>
 
-        <!-- Camera con raycaster ottimizzato per mobile/desktop -->
+        <!-- Camera con raycaster ottimizzato -->
         <a-entity camera>
             <a-entity cursor="rayOrigin: mouse"
-                     raycaster="far: 1000; objects: .clickable"></a-entity>
+                     raycaster="far: 1000; interval: 1; objects: .clickable"></a-entity>
         </a-entity>
     </a-scene>
 
     <script>
-        // VARIABILI GLOBALI
-        let buttonCreated = false;
+        // 1. INIZIALIZZAZIONE
         const statusDiv = document.getElementById('status');
         const container = document.getElementById('button-container');
-        const scene = document.querySelector('a-scene');
+        const hitbox = document.getElementById('button-hitbox');
+        const visual = document.getElementById('button-visual');
+        const redRect = document.getElementById('red-rect');
+        let markerVisible = false;
 
-        // CREAZIONE PULSANTE
-        function createButton() {
-            if(buttonCreated) return;
-            
-            container.innerHTML = `
-                <a-box id="my-button" 
-                      position="0 0 0" 
-                      width="1" 
-                      height="0.3" 
-                      depth="0.1"
-                      color="#4CC3D9"
-                      class="clickable"
-                      event-set__enter="scale: 1.2 1.2 1.2"
-                      event-set__leave="scale: 1 1 1">
-                    <a-text value="CLICCAMI" 
-                           align="center" 
-                           position="0 0 0.1" 
-                           color="white"></a-text>
-                </a-box>
-                
-                <a-box id="red-rect"
-                      position="0 -0.5 0"
-                      width="1.5"
-                      height="0.5"
-                      depth="0.1"
-                      color="red"
-                      visible="false"></a-box>
-            `;
-            
-            buttonCreated = true;
-            statusDiv.textContent = "Pulsante creato - Toccalo!";
-            
-            // Aggiungi event listeners manualmente
-            const button = document.getElementById('my-button');
-            const rect = document.getElementById('red-rect');
-            
-            // Gestione click desktop
-            button.addEventListener('click', () => {
-                rect.setAttribute('visible', !rect.getAttribute('visible'));
-            });
-            
-            // Gestione touch mobile
-            button.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                button.setAttribute('scale', '1.2 1.2 1.2');
-            });
-            
-            button.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                button.setAttribute('scale', '1 1 1');
-                rect.setAttribute('visible', !rect.getAttribute('visible'));
-                statusDiv.textContent = "Toccato! Rettangolo " + 
-                    (rect.getAttribute('visible') ? "visibile" : "nascosto");
-            });
-        }
-
-        // GESTIONE MARKER
+        // 2. GESTIONE MARKER (solo posizionamento iniziale)
         document.getElementById('marker').addEventListener('markerFound', (e) => {
-            if(!buttonCreated) {
-                // Posiziona il container dove è stato trovato il marker
+            if(!markerVisible) {
                 const markerPos = e.target.object3D.position;
                 container.setAttribute('position', markerPos);
                 container.setAttribute('visible', 'true');
-                
-                createButton();
+                markerVisible = true;
+                statusDiv.textContent = "Pulsante pronto - Interagisci!";
+                refreshRaycaster();
             }
         });
 
-        // FORZA AGGIORNAMENTO RAYCASTER (fix per mobile)
-        setTimeout(() => {
-            if(scene.components.raycaster) {
+        // 3. GESTIONE INTERAZIONI
+        function setupInteractions() {
+            // Desktop
+            hitbox.addEventListener('click', () => {
+                toggleRedRect();
+            });
+
+            // Mobile
+            hitbox.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                hitbox.setAttribute('scale', '0.9 0.9 0.9');
+            });
+
+            hitbox.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                hitbox.setAttribute('scale', '1 1 1');
+                toggleRedRect();
+            });
+        }
+
+        function toggleRedRect() {
+            if(!markerVisible) return;
+            
+            const visible = redRect.getAttribute('visible');
+            redRect.setAttribute('visible', !visible);
+            statusDiv.textContent = !visible ? 
+                "Pulsante attivato!" : "Pronto per un nuovo click";
+        }
+
+        // 4. RAYCASTER E PERFORMANCE
+        function refreshRaycaster() {
+            const scene = document.querySelector('a-scene');
+            if(scene && scene.components.raycaster) {
                 scene.components.raycaster.refreshObjects();
             }
-        }, 2000);
+        }
+
+        // 5. AVVIO
+        window.addEventListener('load', () => {
+            setupInteractions();
+            
+            // Fix iniziale per mobile
+            setTimeout(refreshRaycaster, 1000);
+            
+            // Refresh periodico (solo per sicurezza)
+            setInterval(refreshRaycaster, 3000);
+        });
     </script>
 </body>
 </html>
