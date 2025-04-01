@@ -1,51 +1,100 @@
 {
-    "novita": [
-        {
-            "cartella": "Gatto_mo_e_gli_amici_del_bosco",
-            "titoli": {
-                "it": "Gatto Mo e gli amici del bosco",
-                "en": "Cat Mo and the Forest Friends",
-                "fr": "Chat Mo et les amis de la forêt"
-            }
-        },
-        {
-            "cartella": "Dracula",
-            "titoli": {
-                "it": "Dracula",
-                "en": "Dracula",
-                "fr": "Dracula"
-            }
-        },
-        {
-            "cartella": "Pinocchio",
-            "titoli": {
-                "it": "Pinocchio",
-                "en": "Pinocchio",
-                "fr": "Pinocchio"
-            },
-        {
-            "cartella": "Gatto_mo_e_gli_amici_del_bosco",
-            "titoli": {
-                "it": "Gatto Mo e gli amici del bosco",
-                "en": "Cat Mo and the Forest Friends",
-                "fr": "Chat Mo et les amis de la forêt"
-            }
-        },
-        {
-            "cartella": "Dracula",
-            "titoli": {
-                "it": "Dracula",
-                "en": "Dracula",
-                "fr": "Dracula"
-            }
-        },
-        {
-            "cartella": "Pinocchio",
-            "titoli": {
-                "it": "Pinocchio",
-                "en": "Pinocchio",
-                "fr": "Pinocchio"
-            }
-        }
-    ]
+  "novita": [
+    {
+      "cartella": "Gatto_mo_e_gli_amici_del_bosco",
+      "titoli": {
+        "it": "Gatto Mo e gli amici del bosco",
+        "en": "Cat Mo and the Forest Friends",
+        "fr": "Chat Mo et les amis de la forêt"
+      }
+    },
+    {
+      "cartella": "Dracula",
+      "titoli": {
+        "it": "Dracula",
+        "en": "Dracula",
+        "fr": "Dracula"
+      }
+    },
+    {
+      "cartella": "Pinocchio",
+      "titoli": {
+        "it": "Pinocchio",
+        "en": "Pinocchio",
+        "fr": "Pinocchio"
+      }
+    },
+    {
+      "cartella": "Il_viaggio_di_Luma",
+      "titoli": {
+        "it": "Il viaggio di Luma",
+        "en": "Luma's Journey",
+        "fr": "Le voyage de Luma"
+      }
+    },
+    {
+      "cartella": "Il_drago_delle_nevi",
+      "titoli": {
+        "it": "Il drago delle nevi",
+        "en": "The Snow Dragon",
+        "fr": "Le dragon des neiges"
+      }
+    },
+    {
+      "cartella": "La_torre_incantata",
+      "titoli": {
+        "it": "La torre incantata",
+        "en": "The Enchanted Tower",
+        "fr": "La tour enchantée"
+      }
+    },
+    {
+      "cartella": "Stella_e_il_mare_luminoso",
+      "titoli": {
+        "it": "Stella e il mare luminoso",
+        "en": "Stella and the Shining Sea",
+        "fr": "Stella et la mer lumineuse"
+      }
+    },
+    {
+      "cartella": "Il_piccolo_inventore",
+      "titoli": {
+        "it": "Il piccolo inventore",
+        "en": "The Little Inventor",
+        "fr": "Le petit inventeur"
+      }
+    },
+    {
+      "cartella": "Nina_nel_bosco_delle_luci",
+      "titoli": {
+        "it": "Nina nel bosco delle luci",
+        "en": "Nina in the Forest of Lights",
+        "fr": "Nina dans la forêt des lumières"
+      }
+    },
+    {
+      "cartella": "Il_grifone_e_la_luna",
+      "titoli": {
+        "it": "Il grifone e la luna",
+        "en": "The Griffin and the Moon",
+        "fr": "Le griffon et la lune"
+      }
+    },
+    {
+      "cartella": "Il_segretto_di_Ventoquieto",
+      "titoli": {
+        "it": "Il segreto di Ventoquieto",
+        "en": "The Secret of Silentwind",
+        "fr": "Le secret de Ventsilencieux"
+      }
+    },
+    {
+      "cartella": "Il_canto_della_balena",
+      "titoli": {
+        "it": "Il canto della balena",
+        "en": "The Whale's Song",
+        "fr": "Le chant de la baleine"
+      }
+    }
+  ]
 }
