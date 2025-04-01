@@ -1,0 +1,212 @@
+{
+    "pages": [
+        {
+            "pageName": "Page1",
+            "content": {
+                "positions": [
+                    
+                ]
+            }
+        },
+        {
+            "pageName": "Page2",
+            "content": {
+                "positions": [
+                    {
+                        "x": 0,
+                        "y": -730,
+                        "text": "Yeonju Choi"
+                    },
+                    {
+                        "x": 0,
+                        "y": -637,
+                        "text": "Gatto Mo e gli amici del bosco"
+                    },
+                    {
+                        "x": 0,
+                        "y": -112,
+                        "text": "Traduzione di Giuliana Parziale"
+                    }
+                ]
+            }
+        },
+        {
+            "pageName": "Page3",
+            "content": {
+                "positions": [
+
+                ]
+            }
+        },
+        {
+            "pageName": "Page4",
+            "content": {
+                "positions": [
+                    
+                ]
+            }
+        },
+        {
+            "pageName": "Page5",
+            "content": {
+                "positions": [
+                    {
+                        "x": -210,
+                        "y": 719,
+                        "text": "Era notte fonda, in un giorno fra l'autunno e l'inverno"
+                    }
+                ]
+            }
+        },
+        {
+            "pageName": "Page6",
+            "content": {
+                "positions": [
+                    {
+                        "x": 20,
+                        "y": 689,
+                        "text": "Nonno Gufo, tornando da un volo, stava sonnecchiando su un ramo."
+                    }
+                ]
+            }
+        },
+        {
+            "pageName": "Page7",
+            "content": {
+                "positions": [
+                    {
+                        "x": -60,
+                        "y": 742,
+                        "text": "Dormivano della grossa i sei coniglietti dell'ultima cucciolata, che avevano scorrazzato per tutto il giorno."
+                    }
+                ]
+            }
+        },
+        {
+            "pageName": "Page8",
+            "content": {
+                "positions": [
+                    {
+                        "x": -190,
+                        "y": 790,
+                        "text": "Come gli altri abitanti del bosco, riposava tranquilla anche la famiglia dei gatti bianchi e neri, appisolati nella tana sotto la quercia ricurva."
+                    }
+                ]
+            }
+        },
+        {
+            "pageName": "Page9",
+            "content": {
+                "positions": [
+                    {
+                        "x": 100,
+                        "y": 50,
+                        "text": "Diciottesima stringa"
+                    },
+                    {
+                        "x": -200,
+                        "y": -250,
+                        "text": "Diciannovesima stringa"
+                    }
+                ]
+            }
+        },
+        {
+            "pageName": "Page10",
+            "content": {
+                "positions": [
+                    {
+                        "x": 500,
+                        "y": 500,
+                        "text": "Ventesima stringa"
+                    },
+                    {
+                        "x": -100,
+                        "y": -100,
+                        "text": "Ventunesima stringa"
+                    }
+                ]
+            }
+        },
+        {
+            "pageName": "Page11",
+            "content": {
+                "positions": [
+                    {
+                        "x": 0,
+                        "y": -300,
+                        "text": "Ventiduesima stringa"
+                    },
+                    {
+                        "x": 200,
+                        "y": 300,
+                        "text": "Ventitreesima stringa"
+                    }
+                ]
+            }
+        },
+        {
+            "pageName": "Page12",
+            "content": {
+                "positions": [
+                    {
+                        "x": -400,
+                        "y": -600,
+                        "text": "Ventiquattresima stringa"
+                    }
+                ]
+            }
+        },
+        {
+            "pageName": "Page13",
+            "content": {
+                "positions": [
+                    {
+                        "x": 150,
+                        "y": 350,
+                        "text": "Venticinquesima stringa"
+                    },
+                    {
+                        "x": -50,
+                        "y": -150,
+                        "text": "Ventiseiesima stringa"
+                    }
+                ]
+            }
+        },
+        {
+            "pageName": "Page14",
+            "content": {
+                "positions": [
+                    {
+                        "x": 250,
+                        "y": 450,
+                        "text": "Ventisettesima stringa"
+                    },
+                    {
+                        "x": 50,
+                        "y": -50,
+                        "text": "Ventottesima stringa"
+                    }
+                ]
+            }
+        },
+        {
+            "pageName": "Page14",
+            "content": {
+                "positions": [
+                    {
+                        "x": 250,
+                        "y": 450,
+                        "text": "Ventisettesima stringa"
+                    },
+                    {
+                        "x": 50,
+                        "y": -50,
+                        "text": "Ventottesima stringa"
+                    }
+                ]
+            }
+        }
+    ]
+}
