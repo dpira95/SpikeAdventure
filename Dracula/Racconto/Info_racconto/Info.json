@@ -1,10 +1,10 @@
 {
     "info_racconto": {
         "titolo": "Dracula",
-        "autore": "Brham Stoker",
+        "autore": "Bram Stoker",
         "illustrazioni": "Gigino",
         "casa_editrice": "Mondadori",
-        "Anno_pubblicazione":"1891",
-        "trama": "quuseta è una trama di prova da mettere nel campo trama epr vedere se funziona"
+        "Anno_pubblicazione": "1891",
+        "trama": "Questa è una trama di prova per verificare il funzionamento del sistema"
     }
 }
