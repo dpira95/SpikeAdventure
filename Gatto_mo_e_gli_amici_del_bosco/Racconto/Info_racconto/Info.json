@@ -1,10 +1,10 @@
 {
     "info_racconto": {
-        "titolo": "Gatto Mo e gli amici del bosco",
+        "titolo": "Gatto_mo_e_gli_amici_del_bosco",
         "autore": "Yeonju Choi",
         "illustrazioni": "Yeonju Choi",
         "casa_editrice": "Feltrinelli",
-        "Anno_pubblicazione":"2023",
-        "trama": "quuseta è una trama di prova da mettere nel campo trama epr vedere se funziona"
+        "Anno_pubblicazione": "2023",
+        "trama": "Questa è una trama di prova per verificare il funzionamento del sistema"
     }
 }
