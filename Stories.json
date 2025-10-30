@@ -7,8 +7,8 @@
                 "en": "Cat Mo and the Forest Friends",
                 "fr": "Chat Mo et les "
             },
-            "gratuito": true,
-            "prezzo": 0.0,
+            "gratuito": false,
+            "prezzo": 0.05,
             "id_prodotto": "test_0"
         },
         {
