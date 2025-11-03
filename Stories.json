@@ -18,8 +18,8 @@
                 "en": "Dracula",
                 "fr": "Dracula"
             },
-            "gratuito": false,
-            "prezzo": 0.99,
+            "gratuito": true,
+            "prezzo": 0.00,
             "id_prodotto": "story_dracula"
         },
         {
